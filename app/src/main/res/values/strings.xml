@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">IOT</string>
+    <string name="home">Home</string>
+    <string name="controller">Controller</string>
+    <string name="history">History</string>
+    <string name="profile">Profile</string>
+    <string name="user_name">hoanganhvu271</string>
+    <string name="full_name">Hoang Anh Vu </string>
+    <string name="description">Student at PTIT and Mobile Dev at VCS</string>
+</resources>
