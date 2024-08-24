@@ -7,7 +7,7 @@ val SecondColor = Color(0xFFF2F2F2)
 val ThirdColor = Color(0xFF464646)
 
 
-val OnColor = Color(0xFF6FECD3)
+val OnColor = Color(0xFF61D4DF)
 val PurpleGrey80 = Color(0xFFCCC2DC)
 val Pink80 = Color(0xFFEFB8C8)
 

@@ -30,6 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
@@ -78,26 +80,32 @@ fun HistoryScreen() {
     }
 }
 
-
 @Composable
 fun HistoryTable() {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(10.dp))
-            .background(MainBG)
-            .padding(5.dp),
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(MainBG, OnColor),
+                    start = Offset(0f, 0f),
+                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+                )
+            ),
         contentAlignment = Alignment.Center
     ){
         Column() {
-            CellOfHistoryTable(
-                textStyle = TextStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily(Font(R.font.notosans))
-                ),
-                col = listOf("Temp (°C)", "Hum (%)", "Light","Time")
-            )
+
+               CellOfHistoryTable(
+                   textStyle = TextStyle(
+                       fontSize = 14.sp,
+                       fontWeight = FontWeight.Bold,
+                       fontFamily = FontFamily(Font(R.font.notosans))
+                   ),
+                   col = listOf("Temp (°C)", "Hum (%)", "Light","Time")
+               )
+
             Spacer(modifier = Modifier.height(5.dp))
             Divider( color = SecondColor, thickness = 1.dp)
             LazyColumn(modifier = Modifier.fillMaxSize()) {
