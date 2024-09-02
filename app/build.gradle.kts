@@ -90,5 +90,7 @@ dependencies {
     implementation("com.patrykandpatrick.vico:views:2.0.0-alpha.28")
     implementation("com.google.accompanist:accompanist-pager:0.28.0")
 
-
+    // socket.io
+    implementation("io.socket:socket.io-client:2.1.0")
+    implementation("io.socket:engine.io-client:2.1.0")
 }

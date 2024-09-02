@@ -7,4 +7,6 @@
     <string name="user_name">hoanganhvu271</string>
     <string name="full_name">Hoang Anh Vu </string>
     <string name="description">Student at PTIT and Mobile Dev at VCS</string>
+    <string name="action">Action</string>
+    <string name="sensor">Data sensor</string>
 </resources>

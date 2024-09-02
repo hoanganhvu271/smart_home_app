@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
@@ -23,6 +24,8 @@ import androidx.compose.material.Text
 import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,23 +46,30 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.hav.iot.R
-import com.hav.iot.ui.component.ComposeChart1
-import com.hav.iot.ui.component.ComposeChart8
 import com.hav.iot.ui.component.TextHeader
 import com.hav.iot.ui.theme.MainBG
 import com.hav.iot.ui.theme.OnColor
 import com.hav.iot.ui.theme.SecondColor
 import com.hav.iot.ui.theme.ThirdColor
 import com.hav.iot.utils.getCurrentTime
+import com.hav.iot.viewmodel.HomeViewmodel
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.hav.iot.ui.component.ComposeChart8
+import com.hav.iot.ui.component.ComposeChart1
+import com.hav.iot.ui.component.TextHeader2
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(viewmodel: HomeViewmodel) {
+
+    val temperature by viewmodel.temperature.observeAsState(initial = "")
+    val humidity by viewmodel.humidity.observeAsState(initial = "")
+    val light by viewmodel.light.observeAsState(initial = "")
+
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -78,32 +88,40 @@ fun HomeScreen() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(top = 20.dp, start = 20.dp, end = 20.dp, bottom = 10.dp)
 
             ) {
             TextHeader(text = "PTIT Smart Room")
             Spacer(modifier = Modifier.size(20.dp))
             TimeShow()
-            Spacer(modifier = Modifier.size(10.dp))
+            Spacer(modifier = Modifier.size(15.dp))
             Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                StatusBar()
-                Spacer(modifier = Modifier.size(20.dp))
-                HorizontalPager(
-                    count = 2,
-                    state = pagerState,
-                    modifier = Modifier.weight(1f)
-                ) { page ->
-                    when (page) {
-                        0 -> ChartCard("Humidity (%)", modelProducer = modelProducer, type = "column")
-                        1 -> ChartCard("Temperature (°C)", modelProducer = modelProducerLine, type = "line")
-                    }
-                }
-                Spacer(modifier = Modifier.size(5.dp))
-                NextButton {
-                    coroutineScope.launch {
-                        nextPage(pagerState)
-                    }
+                StatusBar(temperature, humidity, light)
+                Spacer(modifier = Modifier.size(8.dp))
+                LazyColumn {
+                    item {
+                        ControllerContainer()
+                        Spacer(modifier = Modifier.size(25.dp))
+                        TextHeader2(text = "Data")
+                        HorizontalPager(
+                            count = 3,
+                            state = pagerState,
+                            modifier = Modifier.weight(1f)
+                        ) { page ->
+                            when (page) {
+                                0 -> ChartCard("Humidity (%)", modelProducer = modelProducer, type = "column")
+                                1 -> ChartCard("Temperature (°C)", modelProducer = modelProducerLine, type = "line")
+                                2 -> ChartCard("Light (lux)", modelProducer = modelProducer, type = "column")
+                            }
+                        }
+                        Spacer(modifier = Modifier.size(5.dp))
+                        NextButton {
+                            coroutineScope.launch {
+                                nextPage(pagerState)
+                            }
 
+                        }
+                    }
                 }
             }
 
@@ -145,7 +163,7 @@ fun ChartCard(name: String, modelProducer: CartesianChartModelProducer, type: St
 }
 
 @Composable
-fun StatusBar() {
+fun StatusBar( temperature: String, humidity: String, light: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -158,13 +176,6 @@ fun StatusBar() {
                 )
             )
     ) {
-//        Card(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .background(Color.Transparent),
-//            shape = RoundedCornerShape(10.dp),
-//            elevation = 0.dp,
-//        ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -187,19 +198,19 @@ fun StatusBar() {
                     StatusItem(
                         R.drawable.ic_temperature,
                         "Temperature",
-                        "25°C",
+                        temperature,
                         modifier = Modifier.weight(1f)
                     )
                     StatusItem(
                         R.drawable.ic_humid,
                         "Humidity",
-                        "50%",
+                        humidity,
                         modifier = Modifier.weight(1f)
                     )
                     StatusItem(
                         R.drawable.ic_light,
                         "Light",
-                        "On",
+                        light,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -242,7 +253,7 @@ fun NextButton(onclick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp),
+            .padding(8.dp),
         contentAlignment = Alignment.Center
     ) {
         Icon(painter =
@@ -311,24 +322,38 @@ fun TimeShow() {
 @OptIn(ExperimentalPagerApi::class)
 private suspend fun nextPage(pagerState: PagerState) {
     val currentPage = pagerState.currentPage
-    pagerState.animateScrollToPage((currentPage + 1) % 2)
+    pagerState.animateScrollToPage((currentPage + 1) % 3)
 }
 
 private val font = androidx.compose.ui.text.font.FontFamily(
     androidx.compose.ui.text.font.Font(R.font.notosans)
 )
 
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//fun Pv1() {
-//    Box(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .clip(RoundedCornerShape(10.dp))
-//    ) {
-//        Image(
-//            painter = painterResource(id = R.drawable.sun_bg),
-//            contentDescription = null
-//        )
-//    }
-//}
+@Composable
+fun ControllerContainer() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(SecondColor)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+        ) {
+            Spacer(modifier = Modifier.height(3.dp))
+//            TextHeader2(text = "Controller")
+            Spacer(modifier = Modifier.height(5.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                ControllerItem(icon = R.drawable.ic_light, name = "Smart Light", status = false)
+                ControllerItem(icon = R.drawable.ic_ac, name = "Smart AC", status = true)
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            LongControllerItem(icon = R.drawable.ic_fan, name = "Smart Fan", status = false)
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+    }
+}

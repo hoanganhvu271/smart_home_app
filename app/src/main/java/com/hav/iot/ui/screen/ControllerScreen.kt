@@ -20,6 +20,9 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,32 +46,43 @@ import com.hav.iot.ui.theme.OnColor
 import com.hav.iot.ui.theme.SecondColor
 import com.hav.iot.ui.theme.ThirdColor
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ControllerScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(SecondColor)
-            .padding(10.dp)
+            .padding(top = 20.dp, start = 20.dp, end = 20.dp, bottom = 55.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxHeight(),
         ) {
             Spacer(modifier = Modifier.height(3.dp))
-            TextHeader(text = "Controller")
+            TextHeader(text = "Action")
             Spacer(modifier = Modifier.height(10.dp))
-            Row(
+            SearchBar(
+                query = "",
+                onQueryChange = {},
+                onSearch = {},
+                active = false,
+                onActiveChange = {},
+                trailingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_search),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(5.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                    .height(40.dp)
+                    .background(Color.Transparent),
+                colors = SearchBarDefaults.colors(
+                    containerColor = MainBG,
+                )
             ) {
-                ControllerItem(icon = R.drawable.ic_light, name = "Smart Light", status = false)
-                ControllerItem(icon = R.drawable.ic_ac, name = "Smart AC", status = true)
             }
-            Spacer(modifier = Modifier.height(10.dp))
-            LongControllerItem(icon = R.drawable.ic_fan, name = "Smart Fan", status = false)
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             StatusTable()
         }
     }
@@ -82,7 +96,7 @@ fun ControllerItem(icon: Int, name: String, status: Boolean) {
 
     Box(
         modifier = Modifier
-            .width(170.dp)
+            .width(160.dp)
             .height(120.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(color)
@@ -128,7 +142,7 @@ fun ControllerItem(icon: Int, name: String, status: Boolean) {
                     text = name,
                     style = TextStyle(
                         fontFamily = customFont,
-                        fontSize = 18.sp
+                        fontSize = 16.sp
                     ),
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -181,7 +195,7 @@ fun LongControllerItem(icon: Int, name: String, status: Boolean) {
                         text = name,
                         style = TextStyle(
                             fontFamily = customFont,
-                            fontSize = 18.sp
+                            fontSize = 16.sp
                         ),
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
@@ -242,9 +256,10 @@ fun StatusTable() {
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily(Font(R.font.notosans))
                 ),
-                col1 = "Device",
-                col2 = "Action",
-                col3 = "Time"
+                col1 = "ID",
+                col2 = "Device",
+                col3 = "Action",
+                col4 = "Time"
             )
             Spacer(modifier = Modifier.height(5.dp))
             Divider( color = SecondColor, thickness = 1.dp)
@@ -264,9 +279,10 @@ fun StatusTable() {
                                 fontSize = 14.sp,
                                 fontFamily = FontFamily(Font(R.font.notosans))
                             ),
-                            col1 = action.device,
-                            col2 = action.action,
-                            col3 = action.time
+                            col1 = action.id.toString(),
+                            col2 = action.device,
+                            col3 = action.action,
+                            col4 = action.time
                         )
                     }
                 }
@@ -276,7 +292,12 @@ fun StatusTable() {
 }
 
 @Composable
-fun CellOfTable(textStyle: TextStyle, col1: String, col2: String, col3: String) {
+fun CellOfTable(textStyle: TextStyle, col1: String, col2: String, col3: String, col4 : String) {
+
+    var color = Color.Black
+    if (col3 == "Turn On") {
+        color = OnColor
+    }
 
     Row(
         modifier = Modifier
@@ -287,7 +308,7 @@ fun CellOfTable(textStyle: TextStyle, col1: String, col2: String, col3: String) 
     ) {
         Box(
             modifier = Modifier
-                .weight(1f)
+                .weight(0.5f)
                 .padding(3.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -302,13 +323,10 @@ fun CellOfTable(textStyle: TextStyle, col1: String, col2: String, col3: String) 
                 .padding(3.dp),
             contentAlignment = Alignment.Center
         ) {
-            var color = Color.Black
-            if (col2 == "Turn On") {
-                color = OnColor
-            }
+
             Text(
                 text = col2,
-                color = color,
+
                 style = textStyle
             )
         }
@@ -320,6 +338,18 @@ fun CellOfTable(textStyle: TextStyle, col1: String, col2: String, col3: String) 
         ) {
             Text(
                 text = col3,
+                color = color,
+                style = textStyle
+            )
+        }
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(3.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = col4,
                 style = textStyle
             )
         }
@@ -327,31 +357,31 @@ fun CellOfTable(textStyle: TextStyle, col1: String, col2: String, col3: String) 
 }
 
 data class Action(
+    val id: Int,
     val device: String,
     val action: String,
     val time: String
 )
 
 val actionList = listOf(
-    Action("Light", "Turn On", "12:00"),
-    Action("AC", "Turn Off", "12:30"),
-    Action("Fan", "Turn On", "13:00"),
-    Action("Light", "Turn Off", "13:30"),
-    Action("AC", "Turn On", "14:00"),
-    Action("Fan", "Turn Off", "14:30"),
-    Action("Light", "Turn On", "15:00"),
-    Action("AC", "Turn Off", "15:30"),
-    Action("Fan", "Turn On", "16:00"),
-    Action("Light", "Turn Off", "16:30"),
-    Action("AC", "Turn On", "17:00"),
-    Action("Fan", "Turn Off", "17:30"),
-    Action("Light", "Turn On", "18:00"),
-    Action("AC", "Turn Off", "18:30"),
-    Action("Fan", "Turn On", "19:00"),
-    Action("Light", "Turn Off", "19:30"),
-    Action("AC", "Turn On", "20:00"),
-    Action("Fan", "Turn Off", "20:30"),
-    Action("Light", "Turn On", "21:00"),
-    Action("AC", "Turn Off", "21:30"),
-
-    )
+    Action(1, "Light", "Turn On", "2024/09/02 12:00:00"),
+    Action(2, "AC", "Turn Off", "2024/09/02 12:30:00"),
+    Action(3, "Fan", "Turn On", "2024/09/02 13:00:00"),
+    Action(4, "Light", "Turn Off", "2024/09/02 13:30:00"),
+    Action(5, "AC", "Turn On", "2024/09/02 14:00:00"),
+    Action(6, "Fan", "Turn Off", "2024/09/02 14:30:00"),
+    Action(7, "Light", "Turn On", "2024/09/02 15:00:00"),
+    Action(8, "AC", "Turn Off", "2024/09/02 15:30:00"),
+    Action(9, "Fan", "Turn On", "2024/09/02 16:00:00"),
+    Action(10, "Light", "Turn Off", "2024/09/02 16:30:00"),
+    Action(11, "AC", "Turn On", "2024/09/02 17:00:00"),
+    Action(12, "Fan", "Turn Off", "2024/09/02 17:30:00"),
+    Action(13, "Light", "Turn On", "2024/09/02 18:00:00"),
+    Action(14, "AC", "Turn Off", "2024/09/02 18:30:00"),
+    Action(15, "Fan", "Turn On", "2024/09/02 19:00:00"),
+    Action(16, "Light", "Turn Off", "2024/09/02 19:30:00"),
+    Action(17, "AC", "Turn On", "2024/09/02 20:00:00"),
+    Action(18, "Fan", "Turn Off", "2024/09/02 20:30:00"),
+    Action(19, "Light", "Turn On", "2024/09/02 21:00:00"),
+    Action(20, "AC", "Turn Off", "2024/09/02 21:30:00"),
+)

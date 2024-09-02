@@ -9,16 +9,17 @@ import com.hav.iot.ui.screen.HomeScreen
 import com.hav.iot.ui.screen.ControllerScreen
 import com.hav.iot.ui.screen.HistoryScreen
 import com.hav.iot.ui.screen.ProfileScreen
+import com.hav.iot.viewmodel.HomeViewmodel
 
 @Composable
-fun NavigationHost(navController: NavHostController, modifier: Modifier = Modifier) {
+fun NavigationHost(homeViewModel: HomeViewmodel, navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
         startDestination = BottomNavItem.Home.route,
         modifier = modifier
     ) {
         composable(BottomNavItem.Home.route) {
-            HomeScreen()
+            HomeScreen(homeViewModel)
         }
         composable(BottomNavItem.Controller.route) {
             ControllerScreen()

@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 val MainBG = Color(0xFFFFFFFF)
 val SecondColor = Color(0xFFF2F2F2)
 val ThirdColor = Color(0xFF464646)
-
+val FourthColor = Color(0xFF9C9999)
 
 val OnColor = Color(0xFF61D4DF)
 val PurpleGrey80 = Color(0xFFCCC2DC)

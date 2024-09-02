@@ -202,7 +202,7 @@ fun MainProfileContent() {
             Text(
                 modifier = Modifier
                     .padding(10.dp),
-                text = "Popular",
+                text = "Results",
                 style = TextStyle(
                     color = Color.Black,
                     fontFamily = font ,
@@ -414,7 +414,7 @@ fun GitContentItem(
 val imageTextList = listOf(
     ImageTextList(R.drawable.ic_msv, "B21DCCN795"),
     ImageTextList(R.drawable.ic_mail, "hoanganhvu271103@gmail.com"),
-    ImageTextList(R.drawable.ic_tym, "3 followers")
+    ImageTextList(R.drawable.ic_tym, "IOT - 06")
 )
 
 
@@ -430,9 +430,9 @@ data class FeatureList(
 )
 
 val profilePopularList = listOf(
-    ProfilePopularList("VDT-Ticket", "Mini project of Phase 1 Viettel Digital Talent 2024 - Software Engineering", "1", "Java"),
-    ProfilePopularList(" Assembly_with_Emu8086 ", "Assembly Project with Emu8086 for Assignment of Computer architecture", "1", "Assembly"),
-    ProfilePopularList("Clonely Homo", "A java game 2D...", "2", "Java")
+    ProfilePopularList("Report", "Link to Report ...", "1", "PDF"),
+    ProfilePopularList("Github Project ", "Link to Git Project...", "1", "Github"),
+    ProfilePopularList("API Docs", "Link to API Docs...", "2", "Postman")
 )
 
 data class ProfilePopularList(
