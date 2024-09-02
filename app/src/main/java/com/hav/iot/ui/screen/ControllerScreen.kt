@@ -89,7 +89,7 @@ fun ControllerScreen() {
 }
 
 @Composable
-fun ControllerItem(icon: Int, name: String, status: Boolean) {
+fun ControllerItem(icon: Int, name: String, status: Boolean, action: (ac: Int) -> Unit){
     val checkedStatus = remember { mutableStateOf(status) }
     val customFont = FontFamily(Font(R.font.notosans))
     var color = if (checkedStatus.value) OnColor else MainBG
@@ -122,6 +122,13 @@ fun ControllerItem(icon: Int, name: String, status: Boolean) {
                 Switch(
                     checked = checkedStatus.value,
                     onCheckedChange = {
+                        if(it){
+                            action(1)
+                        }
+                        else{
+                            action(0)
+                        }
+                      
                         checkedStatus.value = it
                         color = if (it) OnColor else MainBG
                     },

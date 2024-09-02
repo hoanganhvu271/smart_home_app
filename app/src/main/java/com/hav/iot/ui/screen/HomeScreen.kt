@@ -100,7 +100,7 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
                 Spacer(modifier = Modifier.size(8.dp))
                 LazyColumn {
                     item {
-                        ControllerContainer()
+                        ControllerContainer { ac -> viewmodel.turnOnLed(ac) }
                         Spacer(modifier = Modifier.size(25.dp))
                         TextHeader2(text = "Data")
                         HorizontalPager(
@@ -330,7 +330,7 @@ private val font = androidx.compose.ui.text.font.FontFamily(
 )
 
 @Composable
-fun ControllerContainer() {
+fun ControllerContainer(action : (ac: Int) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -348,8 +348,8 @@ fun ControllerContainer() {
                     .padding(5.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                ControllerItem(icon = R.drawable.ic_light, name = "Smart Light", status = false)
-                ControllerItem(icon = R.drawable.ic_ac, name = "Smart AC", status = true)
+                ControllerItem(icon = R.drawable.ic_light, name = "Smart Light", status = false, action)
+                ControllerItem(icon = R.drawable.ic_ac, name = "Smart AC", status = true, {})
             }
             Spacer(modifier = Modifier.height(10.dp))
             LongControllerItem(icon = R.drawable.ic_fan, name = "Smart Fan", status = false)

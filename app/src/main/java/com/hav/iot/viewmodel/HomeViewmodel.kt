@@ -4,8 +4,15 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.hav.iot.data.model.ResponseBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import com.hav.iot.data.api.ApiRepository
 
 class HomeViewmodel : ViewModel() {
+    private val apiRepository = ApiRepository()
+
     private val _temperature = MutableLiveData<String>()
     val temperature: LiveData<String> = _temperature
 
@@ -38,6 +45,38 @@ class HomeViewmodel : ViewModel() {
         catch (_: Exception){
             
         }
+    }
+
+    fun turnOnLed(ac: Int) {
+        if(ac == 1)
+        {
+            apiRepository.apiService.getOnLed().enqueue(object : Callback<ResponseBody> {
+                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                    if (response.isSuccessful) {
+                        // Handle the response here
+                    }
+                }
+
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    // Handle the failure here
+                }
+            })
+        }
+        else
+        {
+            apiRepository.apiService.getOffLed().enqueue(object : Callback<ResponseBody> {
+                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                    if (response.isSuccessful) {
+                        // Handle the response here
+                    }
+                }
+
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    // Handle the failure here
+                }
+            })
+        }
+
     }
 
 }
