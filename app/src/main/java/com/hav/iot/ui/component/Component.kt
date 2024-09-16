@@ -3,6 +3,7 @@ package com.hav.iot.ui.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TextFieldDefaults.indicatorLine
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -94,5 +103,51 @@ fun MainButton(text: String, onClick: () -> Unit, color: Color) {
             modifier = Modifier.align(Alignment.Center)
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchField(
+    searchQuery: String,
+    onQueryChanged: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    TextField(
+        value = searchQuery,
+        onValueChange = onQueryChanged,
+        modifier = modifier
+            .clip(MaterialTheme.shapes.extraSmall)
+            .indicatorLine(
+                enabled = false,
+                isError = false,
+                interactionSource = remember {
+                    MutableInteractionSource()
+                },
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                ),
+                focusedIndicatorLineThickness = 1.dp,
+                unfocusedIndicatorLineThickness = 0.dp
+            ),
+        placeholder = { androidx.compose.material3.Text(text = "Search") },
+        leadingIcon = {
+            androidx.compose.material3.Icon(
+                imageVector = Icons.Rounded.Search,
+                contentDescription = ""
+            )
+        },
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.White,
+            focusedTextColor = Color.Black,
+            unfocusedContainerColor = Color.White,
+            unfocusedTextColor = Color.Black,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            cursorColor = Color.Black,
+        )
+    )
 }
 

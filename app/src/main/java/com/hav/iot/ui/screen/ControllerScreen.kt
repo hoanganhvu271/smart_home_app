@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hav.iot.R
+import com.hav.iot.ui.component.SearchField
 import com.hav.iot.ui.component.TextHeader
 import com.hav.iot.ui.theme.MainBG
 import com.hav.iot.ui.theme.OnColor
@@ -61,27 +62,7 @@ fun ControllerScreen() {
             Spacer(modifier = Modifier.height(3.dp))
             TextHeader(text = "Action")
             Spacer(modifier = Modifier.height(10.dp))
-            SearchBar(
-                query = "",
-                onQueryChange = {},
-                onSearch = {},
-                active = false,
-                onActiveChange = {},
-                trailingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_search),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                },
-                modifier = Modifier
-                    .height(40.dp)
-                    .background(Color.Transparent),
-                colors = SearchBarDefaults.colors(
-                    containerColor = MainBG,
-                )
-            ) {
-            }
+            SearchField(searchQuery = "", onQueryChanged = {}, Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(20.dp))
             StatusTable()
         }

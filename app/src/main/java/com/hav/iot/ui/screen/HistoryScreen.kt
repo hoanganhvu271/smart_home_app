@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hav.iot.R
 import com.hav.iot.ui.component.MainButton
+import com.hav.iot.ui.component.SearchField
 import com.hav.iot.ui.component.TextHeader
 import com.hav.iot.ui.theme.FourthColor
 import com.hav.iot.ui.theme.MainBG
@@ -81,28 +82,7 @@ fun HistoryScreen() {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SearchBar(
-                    query = "",
-                    onQueryChange = {},
-                    onSearch = {},
-                    active = false,
-                    onActiveChange = {},
-                    trailingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_search),
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    },
-                    modifier = Modifier
-                        .height(40.dp)
-                        .weight(5f)
-                        .background(Color.Transparent),
-                    colors = SearchBarDefaults.colors(
-                        containerColor = MainBG,
-                    )
-                ) {
-                }
+                SearchField(searchQuery = "", onQueryChanged = {}, Modifier.fillMaxWidth())
 
                 Spacer(modifier = Modifier.width(8.dp))
 
