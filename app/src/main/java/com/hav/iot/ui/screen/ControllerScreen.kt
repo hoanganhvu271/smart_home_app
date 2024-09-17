@@ -24,6 +24,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,16 +42,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hav.iot.R
+import com.hav.iot.data.model.ActionTable
 import com.hav.iot.ui.component.SearchField
 import com.hav.iot.ui.component.TextHeader
 import com.hav.iot.ui.theme.MainBG
 import com.hav.iot.ui.theme.OnColor
 import com.hav.iot.ui.theme.SecondColor
 import com.hav.iot.ui.theme.ThirdColor
+import com.hav.iot.utils.TimeConvert
+import com.hav.iot.viewmodel.DeviceActionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ControllerScreen() {
+
+    val deviceActionViewModel = DeviceActionViewModel()
+
+    val actionList by deviceActionViewModel.deviceActionList.observeAsState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -64,7 +74,7 @@ fun ControllerScreen() {
             Spacer(modifier = Modifier.height(10.dp))
             SearchField(searchQuery = "", onQueryChanged = {}, Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(20.dp))
-            StatusTable()
+            actionList?.let { StatusTable(it) }
         }
     }
 }
@@ -143,7 +153,7 @@ fun ControllerItem(icon: Int, name: String, status: Boolean, action: (ac: Int) -
 
 
 @Composable
-fun LongControllerItem(icon: Int, name: String, status: Boolean) {
+fun LongControllerItem(icon: Int, name: String, status: Boolean, action : (ac: Int) -> Unit) {
     val checkedStatus = remember { mutableStateOf(status) }
     var color = if (checkedStatus.value) OnColor else MainBG
     Box(
@@ -211,6 +221,13 @@ fun LongControllerItem(icon: Int, name: String, status: Boolean) {
                 Switch(
                     checked = checkedStatus.value,
                     onCheckedChange = {
+                        if(it){
+                            action(1)
+                        }
+                        else{
+                            action(0)
+                        }
+
                         checkedStatus.value = it
                         color = if (it) OnColor else MainBG
                     },
@@ -228,7 +245,7 @@ fun LongControllerItem(icon: Int, name: String, status: Boolean) {
 }
 
 @Composable
-fun StatusTable() {
+fun StatusTable(actionList : List<ActionTable>) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -268,9 +285,9 @@ fun StatusTable() {
                                 fontFamily = FontFamily(Font(R.font.notosans))
                             ),
                             col1 = action.id.toString(),
-                            col2 = action.device,
-                            col3 = action.action,
-                            col4 = action.time
+                            col2 = action.deviceName.toString(),
+                            col3 =  if (action.action == 1) "Turn on" else "Turn off",
+                            col4 = TimeConvert.dateToStringFormat(action.timestamp)
                         )
                     }
                 }
@@ -344,32 +361,32 @@ fun CellOfTable(textStyle: TextStyle, col1: String, col2: String, col3: String, 
     }
 }
 
-data class Action(
-    val id: Int,
-    val device: String,
-    val action: String,
-    val time: String
-)
+//data class Action(
+//    val id: Int,
+//    val device: String,
+//    val action: String,
+//    val time: String
+//)
 
-val actionList = listOf(
-    Action(1, "Light", "Turn On", "2024/09/02 12:00:00"),
-    Action(2, "AC", "Turn Off", "2024/09/02 12:30:00"),
-    Action(3, "Fan", "Turn On", "2024/09/02 13:00:00"),
-    Action(4, "Light", "Turn Off", "2024/09/02 13:30:00"),
-    Action(5, "AC", "Turn On", "2024/09/02 14:00:00"),
-    Action(6, "Fan", "Turn Off", "2024/09/02 14:30:00"),
-    Action(7, "Light", "Turn On", "2024/09/02 15:00:00"),
-    Action(8, "AC", "Turn Off", "2024/09/02 15:30:00"),
-    Action(9, "Fan", "Turn On", "2024/09/02 16:00:00"),
-    Action(10, "Light", "Turn Off", "2024/09/02 16:30:00"),
-    Action(11, "AC", "Turn On", "2024/09/02 17:00:00"),
-    Action(12, "Fan", "Turn Off", "2024/09/02 17:30:00"),
-    Action(13, "Light", "Turn On", "2024/09/02 18:00:00"),
-    Action(14, "AC", "Turn Off", "2024/09/02 18:30:00"),
-    Action(15, "Fan", "Turn On", "2024/09/02 19:00:00"),
-    Action(16, "Light", "Turn Off", "2024/09/02 19:30:00"),
-    Action(17, "AC", "Turn On", "2024/09/02 20:00:00"),
-    Action(18, "Fan", "Turn Off", "2024/09/02 20:30:00"),
-    Action(19, "Light", "Turn On", "2024/09/02 21:00:00"),
-    Action(20, "AC", "Turn Off", "2024/09/02 21:30:00"),
-)
+//val actionList = listOf(
+//    Action(1, "Light", "Turn On", "2024/09/02 12:00:00"),
+//    Action(2, "AC", "Turn Off", "2024/09/02 12:30:00"),
+//    Action(3, "Fan", "Turn On", "2024/09/02 13:00:00"),
+//    Action(4, "Light", "Turn Off", "2024/09/02 13:30:00"),
+//    Action(5, "AC", "Turn On", "2024/09/02 14:00:00"),
+//    Action(6, "Fan", "Turn Off", "2024/09/02 14:30:00"),
+//    Action(7, "Light", "Turn On", "2024/09/02 15:00:00"),
+//    Action(8, "AC", "Turn Off", "2024/09/02 15:30:00"),
+//    Action(9, "Fan", "Turn On", "2024/09/02 16:00:00"),
+//    Action(10, "Light", "Turn Off", "2024/09/02 16:30:00"),
+//    Action(11, "AC", "Turn On", "2024/09/02 17:00:00"),
+//    Action(12, "Fan", "Turn Off", "2024/09/02 17:30:00"),
+//    Action(13, "Light", "Turn On", "2024/09/02 18:00:00"),
+//    Action(14, "AC", "Turn Off", "2024/09/02 18:30:00"),
+//    Action(15, "Fan", "Turn On", "2024/09/02 19:00:00"),
+//    Action(16, "Light", "Turn Off", "2024/09/02 19:30:00"),
+//    Action(17, "AC", "Turn On", "2024/09/02 20:00:00"),
+//    Action(18, "Fan", "Turn Off", "2024/09/02 20:30:00"),
+//    Action(19, "Light", "Turn On", "2024/09/02 21:00:00"),
+//    Action(20, "AC", "Turn Off", "2024/09/02 21:30:00"),
+//)

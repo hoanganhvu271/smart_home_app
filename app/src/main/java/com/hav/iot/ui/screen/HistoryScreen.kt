@@ -20,15 +20,10 @@ import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hav.iot.R
+import com.hav.iot.data.model.DataSensorTable
 import com.hav.iot.ui.component.MainButton
 import com.hav.iot.ui.component.SearchField
 import com.hav.iot.ui.component.TextHeader
@@ -54,10 +50,19 @@ import com.hav.iot.ui.theme.MainBG
 import com.hav.iot.ui.theme.OnColor
 import com.hav.iot.ui.theme.SecondColor
 import com.hav.iot.ui.theme.ThirdColor
+import com.hav.iot.utils.TimeConvert
+import com.hav.iot.viewmodel.DataSensorViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen() {
+    val dataSensorViewModel : DataSensorViewModel = DataSensorViewModel()
+
+    val dataSensorList by dataSensorViewModel.dataSensorList.observeAsState()
+
+    //loading
+    val loading by dataSensorViewModel.loading.observeAsState()
+
     var showDialog by remember { mutableStateOf(false) }
 
     if(showDialog){
@@ -65,7 +70,6 @@ fun HistoryScreen() {
             onDismiss = { showDialog = false }
         )
     }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -73,7 +77,7 @@ fun HistoryScreen() {
             .padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 55.dp)
     ) {
         Column {
-            TextHeader("History")
+            TextHeader("Data sensor")
             Spacer(modifier = Modifier.height(20.dp))
             Row(
                 modifier = Modifier
@@ -82,7 +86,7 @@ fun HistoryScreen() {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SearchField(searchQuery = "", onQueryChanged = {}, Modifier.fillMaxWidth())
+                SearchField(searchQuery = "", onQueryChanged = {}, Modifier.weight(10f))
 
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -90,7 +94,7 @@ fun HistoryScreen() {
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-            HistoryTable()
+            dataSensorList?.let { HistoryTable(it, loading!!, dataSensorViewModel) }
         }
 
     }
@@ -225,7 +229,7 @@ fun FilterButton(onclick: () -> Unit, modifier: Modifier) {
 
 
 @Composable
-fun HistoryTable() {
+fun HistoryTable(data : List<DataSensorTable>, loading : Boolean, viewModel: DataSensorViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -240,7 +244,8 @@ fun HistoryTable() {
             .padding(5.dp),
         contentAlignment = Alignment.Center
     ) {
-        Column() {
+        Column(
+        ) {
             CellOfHistoryTable(
                 textStyle = TextStyle(
                     fontSize = 14.sp,
@@ -249,12 +254,16 @@ fun HistoryTable() {
                 ),
                 col = listOf("ID", "Temp (°C)", "Hum (%)", "Light", "Time")
             )
+
             Spacer(modifier = Modifier.height(5.dp))
             Divider(color = SecondColor, thickness = 1.dp)
             LazyColumn(modifier = Modifier.fillMaxSize()) {
 
-                items(historyList.size) { index ->
-                    val action = historyList[index]
+                items(data.size) { index ->
+                    if(index == data.size - 1){
+                            viewModel.loadMoreItems()
+                    }
+                    val action = data[index]
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -269,15 +278,22 @@ fun HistoryTable() {
                             ),
                             col = listOf(
                                 action.id.toString(),
-                                action.temperature,
-                                action.humidity,
-                                action.light,
-                                action.time
+                                action.temperature.toString(),
+                                action.humidity.toString(),
+                                action.light.toString(),
+                                TimeConvert.dateToStringFormat(action.timestamp)
                             )
                         )
                     }
                     Divider(color = SecondColor, thickness = 1.dp)
+
                 }
+                item{
+                    if(loading){
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    }
+                }
+
             }
         }
     }
@@ -310,39 +326,39 @@ fun CellOfHistoryTable(textStyle: TextStyle, col: List<String>) {
 }
 
 
-private val historyList = listOf(
-    HistoryData(1, "25", "50", "500", "2024/09/02 12:00:00"), // On
-    HistoryData(2, "26", "51", "1000", "2024/09/02 12:01:00"), // Off
-    HistoryData(3, "27", "52", "1000", "2024/09/02 12:02:00"), // Off
-    HistoryData(4, "28", "53", "1000", "2024/09/02 12:03:00"), // Off
-    HistoryData(5, "29", "54", "500", "2024/09/02 12:04:00"), // On
-    HistoryData(6, "30", "55", "1000", "2024/09/02 12:05:00"), // Off
-    HistoryData(7, "31", "56", "500", "2024/09/02 12:06:00"), // On
-    HistoryData(8, "32", "57", "500", "2024/09/02 12:07:00"), // On
-    HistoryData(9, "33", "58", "1000", "2024/09/02 12:08:00"), // Off
-    HistoryData(10, "34", "59", "500", "2024/09/02 12:09:00"), // On
-    HistoryData(11, "35", "60", "500", "2024/09/02 12:10:00"), // On
-    HistoryData(12, "36", "61", "500", "2024/09/02 12:11:00"), // On
-    HistoryData(13, "37", "62", "1000", "2024/09/02 12:12:00"), // Off
-    HistoryData(14, "38", "63", "500", "2024/09/02 12:13:00"), // On
-    HistoryData(15, "39", "64", "500", "2024/09/02 12:14:00"), // On
-    HistoryData(16, "40", "65", "1000", "2024/09/02 12:15:00"), // Off
-    HistoryData(17, "41", "66", "500", "2024/09/02 12:16:00"), // On
-    HistoryData(18, "42", "67", "1000", "2024/09/02 12:17:00"), // Off
-    HistoryData(19, "43", "68", "500", "2024/09/02 12:18:00"), // On
-    HistoryData(20, "44", "69", "500", "2024/09/02 12:19:00"), // On
-    HistoryData(21, "45", "70", "1000", "2024/09/02 12:20:00"), // Off
-    HistoryData(22, "46", "71", "500", "2024/09/02 12:21:00"), // On
-    HistoryData(23, "47", "72", "1000", "2024/09/02 12:22:00"), // Off
-    HistoryData(24, "48", "73", "500", "2024/09/02 12:23:00"), // On
-)
+//private val historyList = listOf(
+//    HistoryData(1, "25", "50", "500", "2024/09/02 12:00:00"), // On
+//    HistoryData(2, "26", "51", "1000", "2024/09/02 12:01:00"), // Off
+//    HistoryData(3, "27", "52", "1000", "2024/09/02 12:02:00"), // Off
+//    HistoryData(4, "28", "53", "1000", "2024/09/02 12:03:00"), // Off
+//    HistoryData(5, "29", "54", "500", "2024/09/02 12:04:00"), // On
+//    HistoryData(6, "30", "55", "1000", "2024/09/02 12:05:00"), // Off
+//    HistoryData(7, "31", "56", "500", "2024/09/02 12:06:00"), // On
+//    HistoryData(8, "32", "57", "500", "2024/09/02 12:07:00"), // On
+//    HistoryData(9, "33", "58", "1000", "2024/09/02 12:08:00"), // Off
+//    HistoryData(10, "34", "59", "500", "2024/09/02 12:09:00"), // On
+//    HistoryData(11, "35", "60", "500", "2024/09/02 12:10:00"), // On
+//    HistoryData(12, "36", "61", "500", "2024/09/02 12:11:00"), // On
+//    HistoryData(13, "37", "62", "1000", "2024/09/02 12:12:00"), // Off
+//    HistoryData(14, "38", "63", "500", "2024/09/02 12:13:00"), // On
+//    HistoryData(15, "39", "64", "500", "2024/09/02 12:14:00"), // On
+//    HistoryData(16, "40", "65", "1000", "2024/09/02 12:15:00"), // Off
+//    HistoryData(17, "41", "66", "500", "2024/09/02 12:16:00"), // On
+//    HistoryData(18, "42", "67", "1000", "2024/09/02 12:17:00"), // Off
+//    HistoryData(19, "43", "68", "500", "2024/09/02 12:18:00"), // On
+//    HistoryData(20, "44", "69", "500", "2024/09/02 12:19:00"), // On
+//    HistoryData(21, "45", "70", "1000", "2024/09/02 12:20:00"), // Off
+//    HistoryData(22, "46", "71", "500", "2024/09/02 12:21:00"), // On
+//    HistoryData(23, "47", "72", "1000", "2024/09/02 12:22:00"), // Off
+//    HistoryData(24, "48", "73", "500", "2024/09/02 12:23:00"), // On
+//)
 
 
-
-data class HistoryData(
-    val id: Int,
-    val temperature: String,
-    val humidity: String,
-    val light: String,
-    val time: String
-)
+//
+//data class HistoryData(
+//    val id: Int,
+//    val temperature: String,
+//    val humidity: String,
+//    val light: String,
+//    val time: String
+//)

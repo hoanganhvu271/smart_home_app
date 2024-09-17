@@ -62,22 +62,37 @@ import com.hav.iot.ui.component.ComposeChart8
 import com.hav.iot.ui.component.ComposeChart1
 import com.hav.iot.ui.component.TextHeader2
 
+
 @OptIn(ExperimentalPagerApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(viewmodel: HomeViewmodel) {
 
+
+    //status data
     val temperature by viewmodel.temperature.observeAsState(initial = "")
     val humidity by viewmodel.humidity.observeAsState(initial = "")
     val light by viewmodel.light.observeAsState(initial = "")
 
+
+    //page slide
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
 
-    val modelProducer = remember { CartesianChartModelProducer() }
+
+    //chart data
+    val tempChartData by viewmodel.tempChartData.observeAsState()
+    val humidChartData by viewmodel.humidChartData.observeAsState()
+    val lightChartData by viewmodel.lightChartData.observeAsState()
+
+    val modelProducerColumn1 = remember { CartesianChartModelProducer() }
     val modelProducerLine = remember { CartesianChartModelProducer() }
-    LaunchedEffect(Unit) {
-        modelProducer.runTransaction { columnSeries { series(y = listOf(2, 5, 3, 4, 2)) } }
-        modelProducerLine.runTransaction { lineSeries { series(1, 8, 3, 7, 6) }}
+    val modelProducerColumn2 = remember { CartesianChartModelProducer() }
+
+
+    LaunchedEffect(tempChartData, humidChartData, lightChartData) {
+        modelProducerColumn1.runTransaction { columnSeries { tempChartData?.let { series(y = it) } } }
+        modelProducerLine.runTransaction { lineSeries { tempChartData?.let { series(y = it) } }}
+        modelProducerColumn2.runTransaction { columnSeries { lightChartData?.let { series(y = it) } } }
     }
 
     Box(
@@ -89,7 +104,6 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 20.dp, start = 20.dp, end = 20.dp, bottom = 10.dp)
-
             ) {
             TextHeader(text = "PTIT Smart Room")
             Spacer(modifier = Modifier.size(20.dp))
@@ -100,7 +114,7 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
                 Spacer(modifier = Modifier.size(8.dp))
                 LazyColumn {
                     item {
-                        ControllerContainer { ac -> viewmodel.turnOnLed(ac) }
+                        ControllerContainer(viewmodel)
                         Spacer(modifier = Modifier.size(25.dp))
                         TextHeader2(text = "Data")
                         HorizontalPager(
@@ -109,9 +123,9 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
                             modifier = Modifier.weight(1f)
                         ) { page ->
                             when (page) {
-                                0 -> ChartCard("Humidity (%)", modelProducer = modelProducer, type = "column")
+                                0 -> ChartCard("Humidity (%)", modelProducer = modelProducerColumn1, type = "column")
                                 1 -> ChartCard("Temperature (°C)", modelProducer = modelProducerLine, type = "line")
-                                2 -> ChartCard("Light (lux)", modelProducer = modelProducer, type = "column")
+                                2 -> ChartCard("Light (lux)", modelProducer = modelProducerColumn2, type = "column")
                             }
                         }
                         Spacer(modifier = Modifier.size(5.dp))
@@ -330,7 +344,7 @@ private val font = androidx.compose.ui.text.font.FontFamily(
 )
 
 @Composable
-fun ControllerContainer(action : (ac: Int) -> Unit) {
+fun ControllerContainer(viewmodel: HomeViewmodel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -348,11 +362,11 @@ fun ControllerContainer(action : (ac: Int) -> Unit) {
                     .padding(5.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                ControllerItem(icon = R.drawable.ic_light, name = "Smart Light", status = false, action)
-                ControllerItem(icon = R.drawable.ic_ac, name = "Smart AC", status = true, {})
+                ControllerItem(icon = R.drawable.ic_light, name = "Smart Light", status = false ){ac -> viewmodel.turnOnLed(ac, 1)}
+                ControllerItem(icon = R.drawable.ic_ac, name = "Smart AC", status = true){ac -> viewmodel.turnOnLed(ac, 2)}
             }
             Spacer(modifier = Modifier.height(10.dp))
-            LongControllerItem(icon = R.drawable.ic_fan, name = "Smart Fan", status = false)
+            LongControllerItem(icon = R.drawable.ic_fan, name = "Smart Fan", status = false){ac -> viewmodel.turnOnLed(ac, 3)}
             Spacer(modifier = Modifier.height(10.dp))
         }
     }
