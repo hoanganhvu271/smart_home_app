@@ -4,7 +4,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
     @JvmStatic
-    var retrofit: Retrofit? = null
+    public var retrofit: Retrofit? = null
         get() {
             if (field == null) {
                 field = Retrofit.Builder()

@@ -15,7 +15,7 @@ import retrofit2.Response
 import javax.security.auth.callback.Callback
 
 class DeviceActionViewModel : ViewModel(){
-    private val apiRepository : ApiRepository = ApiRepository()
+    private val apiRepository : ApiRepository<Any?> = ApiRepository()
 
     private val _deviceActionList = MutableLiveData<List<ActionTable>>()
     val deviceActionList : LiveData<List<ActionTable>> = _deviceActionList
@@ -47,27 +47,27 @@ class DeviceActionViewModel : ViewModel(){
             _filter.value = ""
             _filterBy.value = ""
 
-            getDeviceActionFromApi()
+//            getDeviceActionFromApi()
         }
     }
 
-    private fun getDeviceActionFromApi() {
-        apiRepository.apiService.getDeviceAction(_page.value!!, _pageSize.value!!, _sortBy.value!!, _order.value!!, _filter.value!!, _filterBy.value!!)
-            .enqueue(object : retrofit2.Callback<DataResponse<ActionTable>> {
-                override fun onResponse(
-                    p0: Call<DataResponse<ActionTable>>,
-                    p1: Response<DataResponse<ActionTable>>
-                ) {
-                    if(p1.isSuccessful){
-                        _deviceActionList.value = p1.body()?.data
-                    }
-                }
-
-                override fun onFailure(p0: Call<DataResponse<ActionTable>>, p1: Throwable) {
-                    Log.d("vu", "error get api")
-                    _deviceActionList.value = emptyList()
-                }
-
-            })
-    }
+//    private suspend fun getDeviceActionFromApi() {
+//        apiRepository.apiService.getDeviceAction(_page.value!!, _pageSize.value!!, _sortBy.value!!, _order.value!!, _filter.value!!, _filterBy.value!!)
+//            .enqueue(object : retrofit2.Callback<DataResponse<ActionTable>> {
+//                override fun onResponse(
+//                    p0: Call<DataResponse<ActionTable>>,
+//                    p1: Response<DataResponse<ActionTable>>
+//                ) {
+//                    if(p1.isSuccessful){
+//                        _deviceActionList.value = p1.body()?.data
+//                    }
+//                }
+//
+//                override fun onFailure(p0: Call<DataResponse<ActionTable>>, p1: Throwable) {
+//                    Log.d("vu", "error get api")
+//                    _deviceActionList.value = emptyList()
+//                }
+//
+//            })
+//    }
 }

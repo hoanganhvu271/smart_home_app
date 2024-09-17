@@ -40,6 +40,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.hav.iot.R
 import com.hav.iot.data.model.DataSensorTable
 import com.hav.iot.ui.component.MainButton
@@ -58,10 +61,9 @@ import com.hav.iot.viewmodel.DataSensorViewModel
 fun HistoryScreen() {
     val dataSensorViewModel : DataSensorViewModel = DataSensorViewModel()
 
-    val dataSensorList by dataSensorViewModel.dataSensorList.observeAsState()
+    val dataSensorItems = dataSensorViewModel.dataSensorFlow.collectAsLazyPagingItems()
 
-    //loading
-    val loading by dataSensorViewModel.loading.observeAsState()
+
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -94,7 +96,7 @@ fun HistoryScreen() {
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-            dataSensorList?.let { HistoryTable(it, loading!!, dataSensorViewModel) }
+            HistoryTable(dataSensorItems)
         }
 
     }
@@ -229,7 +231,7 @@ fun FilterButton(onclick: () -> Unit, modifier: Modifier) {
 
 
 @Composable
-fun HistoryTable(data : List<DataSensorTable>, loading : Boolean, viewModel: DataSensorViewModel) {
+fun HistoryTable(dataSensorItems : LazyPagingItems<DataSensorTable>) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -240,7 +242,7 @@ fun HistoryTable(data : List<DataSensorTable>, loading : Boolean, viewModel: Dat
                     start = Offset(0f, 0f),
                     end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
                 )
-                )
+            )
             .padding(5.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -257,44 +259,76 @@ fun HistoryTable(data : List<DataSensorTable>, loading : Boolean, viewModel: Dat
 
             Spacer(modifier = Modifier.height(5.dp))
             Divider(color = SecondColor, thickness = 1.dp)
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-
-                items(data.size) { index ->
-                    if(index == data.size - 1){
-                            viewModel.loadMoreItems()
-                    }
-                    val action = data[index]
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(5.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        CellOfHistoryTable(
-                            textStyle = TextStyle(
-                                fontSize = 14.sp,
-                                fontFamily = FontFamily(Font(R.font.notosans))
-                            ),
-                            col = listOf(
-                                action.id.toString(),
-                                action.temperature.toString(),
-                                action.humidity.toString(),
-                                action.light.toString(),
-                                TimeConvert.dateToStringFormat(action.timestamp)
-                            )
-                        )
-                    }
-                    Divider(color = SecondColor, thickness = 1.dp)
-
+            if (dataSensorItems.loadState.refresh is LoadState.Loading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
-                item{
-                    if(loading){
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                    }
-                }
-
             }
+            else{
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    items(dataSensorItems.itemCount) { index ->
+                        val action = dataSensorItems[index]
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(5.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (action != null) {
+                                CellOfHistoryTable(
+                                    textStyle = TextStyle(
+                                        fontSize = 14.sp,
+                                        fontFamily = FontFamily(Font(R.font.notosans))
+                                    ),
+                                    col = listOf(
+                                        action.id.toString(),
+                                        action.temperature.toString(),
+                                        action.humidity.toString(),
+                                        action.light.toString(),
+                                        TimeConvert.dateToStringFormat(action.timestamp)
+                                    )
+                                )
+                            }
+                        }
+                        Divider(color = SecondColor, thickness = 1.dp)
+                    }
+                    // Handle load state for footer loading indicator
+                    dataSensorItems.apply {
+                        when {
+                            loadState.append is LoadState.Loading -> {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
+                            }
+                            loadState.append is LoadState.Error -> {
+                                item {
+                                    Text(
+                                        text = "Error loading more data",
+                                        color = Color.Red,
+                                        modifier = Modifier.fillMaxWidth().padding(16.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
         }
     }
 }
