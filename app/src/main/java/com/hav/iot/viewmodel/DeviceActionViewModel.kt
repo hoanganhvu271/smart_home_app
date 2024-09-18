@@ -5,10 +5,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import com.hav.iot.data.api.ApiRepository
 import com.hav.iot.data.model.ActionTable
 import com.hav.iot.data.model.DataResponse
 import com.hav.iot.data.model.DataSensorTable
+import com.hav.iot.paging.DataSensorPagingSource
+import com.hav.iot.paging.DeviceActionPagingSource
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Response
@@ -38,6 +43,23 @@ class DeviceActionViewModel : ViewModel(){
     private val _filter = MutableLiveData<String>()
     val filter : LiveData<String> = _filter
 
+    private var currentPagingSource: DeviceActionPagingSource? = null
+
+
+    val deviceActionFlow = Pager(PagingConfig(initialLoadSize = 10, pageSize = 10,  prefetchDistance = 5, enablePlaceholders = false)) {
+        DeviceActionPagingSource(
+            apiRepository,
+            _sortBy.value ?: "timestamp",
+            _order.value ?: "DESC",
+            _filter.value ?: "",
+            _filterBy.value ?: ""
+        ).also { currentPagingSource = it }
+    }.flow.cachedIn(viewModelScope)
+
+    fun reload(){
+        currentPagingSource?.invalidate()
+    }
+
     init{
         viewModelScope.launch {
             _page.value = 1
@@ -45,29 +67,9 @@ class DeviceActionViewModel : ViewModel(){
             _sortBy.value = "timestamp"
             _order.value = "DESC"
             _filter.value = ""
-            _filterBy.value = ""
-
-//            getDeviceActionFromApi()
+            _filterBy.value = "timestamp"
         }
     }
 
-//    private suspend fun getDeviceActionFromApi() {
-//        apiRepository.apiService.getDeviceAction(_page.value!!, _pageSize.value!!, _sortBy.value!!, _order.value!!, _filter.value!!, _filterBy.value!!)
-//            .enqueue(object : retrofit2.Callback<DataResponse<ActionTable>> {
-//                override fun onResponse(
-//                    p0: Call<DataResponse<ActionTable>>,
-//                    p1: Response<DataResponse<ActionTable>>
-//                ) {
-//                    if(p1.isSuccessful){
-//                        _deviceActionList.value = p1.body()?.data
-//                    }
-//                }
-//
-//                override fun onFailure(p0: Call<DataResponse<ActionTable>>, p1: Throwable) {
-//                    Log.d("vu", "error get api")
-//                    _deviceActionList.value = emptyList()
-//                }
-//
-//            })
-//    }
+
 }

@@ -102,5 +102,7 @@ dependencies {
     implementation("androidx.paging:paging-runtime:3.1.1")
     implementation("androidx.paging:paging-compose:3.2.0")
 
+    //refresh
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.35.2-beta")
 
 }

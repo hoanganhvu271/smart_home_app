@@ -1,24 +1,22 @@
 package com.hav.iot.paging
 
-import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.hav.iot.data.api.ApiRepository
+import com.hav.iot.data.model.ActionTable
 import com.hav.iot.data.model.DataSensorTable
 
-class DataSensorPagingSource(
-    private val apiRepository: ApiRepository<Any?>,
-    private val sortBy: String,
-    private val order: String,
-    private val filter: String,
-    private val filterBy: String
-) : PagingSource<Int, DataSensorTable>() {
+class DeviceActionPagingSource (private val apiRepository: ApiRepository<Any?>,
+                                private val sortBy: String,
+                                private val order: String,
+                                private val filter: String,
+                                private val filterBy: String
+) : PagingSource<Int, ActionTable>() {
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, DataSensorTable> {
-        Log.d("vu", filter)
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, ActionTable> {
         return try {
             val currentPage = params.key ?: 1
-            val response = apiRepository.apiService.getDataSensor(
+            val response = apiRepository.apiService.getDeviceAction(
                 page = currentPage,
                 pageSize = params.loadSize ?: 10,
                 sortBy = sortBy,
@@ -44,7 +42,7 @@ class DataSensorPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Int, DataSensorTable>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, ActionTable>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
             state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
                 ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)

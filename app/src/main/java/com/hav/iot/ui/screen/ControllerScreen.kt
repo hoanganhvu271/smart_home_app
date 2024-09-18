@@ -20,14 +20,12 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +39,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshState
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.hav.iot.R
 import com.hav.iot.data.model.ActionTable
 import com.hav.iot.ui.component.SearchField
@@ -51,6 +55,7 @@ import com.hav.iot.ui.theme.SecondColor
 import com.hav.iot.ui.theme.ThirdColor
 import com.hav.iot.utils.TimeConvert
 import com.hav.iot.viewmodel.DeviceActionViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +63,18 @@ fun ControllerScreen() {
 
     val deviceActionViewModel = DeviceActionViewModel()
 
-    val actionList by deviceActionViewModel.deviceActionList.observeAsState()
+    val actionList = deviceActionViewModel.deviceActionFlow.collectAsLazyPagingItems()
+
+    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = false)
+    val coroutineScope = rememberCoroutineScope()
+
+    fun onRefresh() {
+        coroutineScope.launch {
+            swipeRefreshState.isRefreshing = true
+            deviceActionViewModel.reload()
+            swipeRefreshState.isRefreshing = false
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -74,7 +90,7 @@ fun ControllerScreen() {
             Spacer(modifier = Modifier.height(10.dp))
             SearchField(searchQuery = "", onQueryChanged = {}, Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(20.dp))
-            actionList?.let { StatusTable(it) }
+            StatusTable(actionList = actionList, swipeRefreshState = swipeRefreshState) { onRefresh() }
         }
     }
 }
@@ -245,7 +261,7 @@ fun LongControllerItem(icon: Int, name: String, status: Boolean, action : (ac: I
 }
 
 @Composable
-fun StatusTable(actionList : List<ActionTable>) {
+fun StatusTable(actionList: LazyPagingItems<ActionTable>, swipeRefreshState: SwipeRefreshState, onRefresh: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -268,28 +284,75 @@ fun StatusTable(actionList : List<ActionTable>) {
             )
             Spacer(modifier = Modifier.height(5.dp))
             Divider( color = SecondColor, thickness = 1.dp)
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-
-                items(actionList.size) { index ->
-                    val action = actionList[index]
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(5.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                if (actionList.loadState.refresh is LoadState.Loading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        CellOfTable(
-                            textStyle = TextStyle(
-                                fontSize = 14.sp,
-                                fontFamily = FontFamily(Font(R.font.notosans))
-                            ),
-                            col1 = action.id.toString(),
-                            col2 = action.deviceName.toString(),
-                            col3 =  if (action.action == 1) "Turn on" else "Turn off",
-                            col4 = TimeConvert.dateToStringFormat(action.timestamp)
-                        )
+                        CircularProgressIndicator()
                     }
+                } else {
+                    SwipeRefresh(
+                        state = swipeRefreshState,
+                        onRefresh = { onRefresh() }
+                    ) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                        ) {
+                            items(actionList.itemCount) { index ->
+                                val action = actionList[index]
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(5.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    if (action != null) {
+                                        CellOfTable(
+                                            textStyle = TextStyle(
+                                                fontSize = 14.sp,
+                                                fontFamily = FontFamily(Font(R.font.notosans))
+                                            ),
+                                            col1 = action.id.toString(),
+                                            col2 = action.deviceName.toString(),
+                                            col3 =  if (action.action == 1) "Turn on" else "Turn off",
+                                            col4 = TimeConvert.dateToStringFormat(action.timestamp)
+                                        )
+                                    }
+                                }
+                            }
+                            // Handle load state for footer loading indicator
+                            actionList.apply {
+                                when {
+                                    loadState.append is LoadState.Loading -> {
+                                        item {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(16.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                CircularProgressIndicator()
+                                            }
+                                        }
+                                    }
+
+                                    loadState.append is LoadState.Error -> {
+                                        item {
+                                            Text(
+                                                text = "Error loading more data",
+                                                color = Color.Red,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(16.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                 }
             }
         }

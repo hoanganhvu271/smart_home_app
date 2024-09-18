@@ -114,7 +114,9 @@ fun SearchField(
 ) {
     TextField(
         value = searchQuery,
-        onValueChange = onQueryChanged,
+        onValueChange = { it ->
+            onQueryChanged(it)
+        } ,
         modifier = modifier
             .clip(MaterialTheme.shapes.extraSmall)
             .indicatorLine(
