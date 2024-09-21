@@ -1,7 +1,7 @@
 package com.hav.iot.data.model
 
 data class DataSensor (
-    val temperature: Int,
-    val humidity: Int,
+    val temp: Int,
+    val humid: Int,
     val light : Int
 )

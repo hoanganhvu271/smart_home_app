@@ -10,11 +10,13 @@ import com.hav.iot.ui.screen.ControllerScreen
 import com.hav.iot.ui.screen.HistoryScreen
 import com.hav.iot.ui.screen.ProfileScreen
 import com.hav.iot.viewmodel.DataSensorViewModel
+import com.hav.iot.viewmodel.DeviceActionViewModel
 import com.hav.iot.viewmodel.HomeViewmodel
 
 @Composable
 fun NavigationHost(homeViewModel: HomeViewmodel, navController: NavHostController, modifier: Modifier = Modifier,
-                   dataSensorViewModel: DataSensorViewModel
+                   dataSensorViewModel: DataSensorViewModel,
+                     deviceActionViewModel: DeviceActionViewModel
 ) {
     NavHost(
         navController = navController,
@@ -25,7 +27,7 @@ fun NavigationHost(homeViewModel: HomeViewmodel, navController: NavHostControlle
             HomeScreen(homeViewModel)
         }
         composable(BottomNavItem.Controller.route) {
-            ControllerScreen()
+            ControllerScreen( deviceActionViewModel)
         }
         composable(BottomNavItem.History.route) {
             HistoryScreen(dataSensorViewModel)

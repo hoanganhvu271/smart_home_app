@@ -1,5 +1,6 @@
 package com.hav.iot.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -67,6 +68,10 @@ import com.hav.iot.ui.component.TextHeader2
 @Composable
 fun HomeScreen(viewmodel: HomeViewmodel) {
 
+    //action status:
+    val actionList by viewmodel.actionList.observeAsState(initial = listOf(0, 0, 0))
+    val actionColorList by viewmodel.actionColorList.observeAsState(initial = listOf(0, 0, 0))
+
 
     //status data
     val temperature by viewmodel.temperature.observeAsState(initial = "")
@@ -84,13 +89,17 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
     val humidChartData by viewmodel.humidChartData.observeAsState()
     val lightChartData by viewmodel.lightChartData.observeAsState()
 
+//    Log.d("vu", "HomeScreen: $tempChartData")
+//    Log.d("vu", "HomeScreen: $humidChartData")
+//    Log.d("vu", "HomeScreen: $lightChartData")
+
     val modelProducerColumn1 = remember { CartesianChartModelProducer() }
     val modelProducerLine = remember { CartesianChartModelProducer() }
     val modelProducerColumn2 = remember { CartesianChartModelProducer() }
 
 
     LaunchedEffect(tempChartData, humidChartData, lightChartData) {
-        modelProducerColumn1.runTransaction { columnSeries { tempChartData?.let { series(y = it) } } }
+        modelProducerColumn1.runTransaction { columnSeries { humidChartData?.let { series(y = it) } } }
         modelProducerLine.runTransaction { lineSeries { tempChartData?.let { series(y = it) } }}
         modelProducerColumn2.runTransaction { columnSeries { lightChartData?.let { series(y = it) } } }
     }
@@ -114,7 +123,7 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
                 Spacer(modifier = Modifier.size(8.dp))
                 LazyColumn {
                     item {
-                        ControllerContainer(viewmodel)
+                        ControllerContainer(viewmodel, actionColorList, actionList)
                         Spacer(modifier = Modifier.size(25.dp))
                         TextHeader2(text = "Data")
                         HorizontalPager(
@@ -344,7 +353,7 @@ private val font = androidx.compose.ui.text.font.FontFamily(
 )
 
 @Composable
-fun ControllerContainer(viewmodel: HomeViewmodel) {
+fun ControllerContainer(viewmodel: HomeViewmodel, actionColorList: List<Int>, actionList: List<Int>) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -362,11 +371,11 @@ fun ControllerContainer(viewmodel: HomeViewmodel) {
                     .padding(5.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                ControllerItem(icon = R.drawable.ic_light, name = "Smart Light", status = false ){ac -> viewmodel.turnOnLed(ac, 1)}
-                ControllerItem(icon = R.drawable.ic_ac, name = "Smart AC", status = true){ac -> viewmodel.turnOnLed(ac, 2)}
+                ControllerItem(icon = R.drawable.ic_light, name = "Smart Light",  actionColorList[0], actionList[0], viewmodel, 0 )
+                ControllerItem(icon = R.drawable.ic_ac, name = "Smart AC", actionColorList[1], actionList[1], viewmodel, 1)
             }
             Spacer(modifier = Modifier.height(10.dp))
-            LongControllerItem(icon = R.drawable.ic_fan, name = "Smart Fan", status = false){ac -> viewmodel.turnOnLed(ac, 3)}
+            LongControllerItem(icon = R.drawable.ic_fan, name = "Smart Fan", actionColorList[2], actionList[2], viewmodel, 2)
             Spacer(modifier = Modifier.height(10.dp))
         }
     }

@@ -7,14 +7,15 @@ import com.hav.iot.data.model.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface ApiService {
 
-    @GET("api/turn-on")
+    @POST("api/turn-on")
     suspend fun getOnLed(@Query("id") deviceId : Int): Response<ResponseBody>
 
-    @GET("api/turn-off")
+    @POST("api/turn-off")
     suspend fun getOffLed(@Query("id") deviceId : Int): Response<ResponseBody>
 
     @GET("api/get-data-sensor")

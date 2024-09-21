@@ -20,7 +20,7 @@ data class DataSensorTable(
 
 data class ActionTable(
     val id : Int,
-    val deviceName: Int,
+    val device_id: String,
     val action : Int,
     val timestamp: Date
 )

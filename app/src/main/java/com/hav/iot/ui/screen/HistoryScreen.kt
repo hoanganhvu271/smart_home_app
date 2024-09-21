@@ -3,6 +3,7 @@ package com.hav.iot.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -35,6 +37,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -50,6 +54,9 @@ import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.hav.iot.R
 import com.hav.iot.data.model.DataSensorTable
+import com.hav.iot.ui.component.EmptyContent
+import com.hav.iot.ui.component.FilterButton
+import com.hav.iot.ui.component.FilterDialog
 import com.hav.iot.ui.component.MainButton
 import com.hav.iot.ui.component.SearchField
 import com.hav.iot.ui.component.TextHeader
@@ -66,14 +73,24 @@ import kotlinx.coroutines.launch
 @Composable
 fun HistoryScreen(dataSensorViewModel: DataSensorViewModel) {
 
-
     val dataSensorItems = dataSensorViewModel.dataSensorFlow.collectAsLazyPagingItems()
 
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = false)
     val coroutineScope = rememberCoroutineScope()
 
+    val sortOptions by dataSensorViewModel.sortOptions.observeAsState(listOf(false, false, false, true))
+    val filterOptions by dataSensorViewModel.filterOptions.observeAsState(listOf(false, false, false, true))
+
+
     //query
     val queryText by dataSensorViewModel.filter.collectAsState("")
+
+    //order
+    val orderState by dataSensorViewModel.order.observeAsState("DESC")
+
+
+    //focus
+    val focusManager = LocalFocusManager.current
 
     fun onRefresh() {
         coroutineScope.launch {
@@ -87,14 +104,23 @@ fun HistoryScreen(dataSensorViewModel: DataSensorViewModel) {
 
     if (showDialog) {
         FilterDialog(
-            onDismiss = { showDialog = false }
+            sort = sortOptions,
+            filter = filterOptions,
+            onDismiss = { showDialog = false },
+            dataSensorViewModel,
+            order = orderState
         )
     }
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                })
+            }
             .background(SecondColor)
-            .padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 55.dp)
+            .padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 45.dp)
     ) {
         Column {
             TextHeader("Data sensor")
@@ -106,7 +132,11 @@ fun HistoryScreen(dataSensorViewModel: DataSensorViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SearchField(searchQuery = queryText, onQueryChanged = dataSensorViewModel::onQueryTextChanged, Modifier.weight(10f))
+                SearchField(
+                    searchQuery = queryText,
+                    onQueryChanged = dataSensorViewModel::onQueryTextChanged,
+                    Modifier.weight(8f)
+                )
 
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -120,143 +150,12 @@ fun HistoryScreen(dataSensorViewModel: DataSensorViewModel) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun FilterDialog(onDismiss: () -> Unit) {
-    ModalBottomSheet(
-        onDismissRequest = { onDismiss() },
-        sheetState = rememberModalBottomSheetState(),
-        dragHandle = { BottomSheetDefaults.DragHandle() },
-        containerColor = MainBG,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp, bottom = 30.dp, start = 10.dp, end = 10.dp),
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    "Sort", modifier = Modifier.padding(8.dp), style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily(Font(R.font.notosans))
-
-                    )
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    ItemBorder(name = "Temperature", {})
-                    Spacer(modifier = Modifier.width(50.dp))
-                    ItemBorder(name = "Humidity", {})
-                    Spacer(modifier = Modifier.width(50.dp))
-                    ItemBorder(name = "Light", {})
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                ) {
-                    ItemBorder(name = "Time", {})
-                }
-            }
-
-//            Divider(thickness = 1.dp, color = ThirdColor)
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    "Filter", modifier = Modifier.padding(8.dp), style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily(Font(R.font.notosans))
-
-                    )
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    ItemBorder(name = "Temperature", {})
-                    Spacer(modifier = Modifier.width(50.dp))
-                    ItemBorder(name = "Humidity", {})
-                    Spacer(modifier = Modifier.width(50.dp))
-                    ItemBorder(name = "Light", {})
-                }
-            }
-
-            Divider(thickness = 1.dp, color = FourthColor, modifier = Modifier.padding(10.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                MainButton(text = "Cancel", onClick = onDismiss, color = MainBG)
-                MainButton(text = "Confirm", onClick = onDismiss, color = OnColor)
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-
-        }
-    }
-}
-
-@Composable
-fun ItemBorder(name: String, onclick: () -> Unit) {
-    var color by remember { mutableStateOf(MainBG) }
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(10.dp))
-            .border(1.dp, ThirdColor, RoundedCornerShape(10.dp))
-            .background(color)
-            .padding(8.dp)
-            .clickable {
-                onclick()
-                if (color == MainBG) {
-                    color = OnColor
-                } else {
-                    color = MainBG
-                }
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        Text(name)
-    }
-}
-
-@Composable
-fun FilterButton(onclick: () -> Unit, modifier: Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MainBG)
-            .padding(7.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .clickable {
-                onclick()
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            modifier = Modifier.size(22.dp),
-            painter = painterResource(id = R.drawable.ic_filter),
-            contentDescription = null
-        )
-    }
-}
-
-
-@Composable
-fun HistoryTable(dataSensorItems: LazyPagingItems<DataSensorTable>, swipeRefreshState : SwipeRefreshState, onRefresh: () -> Unit){
+fun HistoryTable(
+    dataSensorItems: LazyPagingItems<DataSensorTable>,
+    swipeRefreshState: SwipeRefreshState,
+    onRefresh: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -300,32 +199,39 @@ fun HistoryTable(dataSensorItems: LazyPagingItems<DataSensorTable>, swipeRefresh
                         modifier = Modifier
                             .fillMaxSize()
                     ) {
-                        items(dataSensorItems.itemCount) { index ->
-                            val action = dataSensorItems[index]
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(5.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                if (action != null) {
-                                    CellOfHistoryTable(
-                                        textStyle = TextStyle(
-                                            fontSize = 14.sp,
-                                            fontFamily = FontFamily(Font(R.font.notosans))
-                                        ),
-                                        col = listOf(
-                                            action.id.toString(),
-                                            action.temperature.toString(),
-                                            action.humidity.toString(),
-                                            action.light.toString(),
-                                            TimeConvert.dateToStringFormat(action.timestamp)
-                                        )
-                                    )
-                                }
+                        if(dataSensorItems.itemCount == 0){
+                            item {
+                                EmptyContent()
                             }
-                            Divider(color = SecondColor, thickness = 1.dp)
+                        }
+                        else{
+                            items(dataSensorItems.itemCount) { index ->
+                                val action = dataSensorItems[index]
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(5.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    if (action != null) {
+                                        CellOfHistoryTable(
+                                            textStyle = TextStyle(
+                                                fontSize = 12.sp,
+                                                fontFamily = FontFamily(Font(R.font.notosans))
+                                            ),
+                                            col = listOf(
+                                                action.id.toString(),
+                                                action.temperature.toString(),
+                                                action.humidity.toString(),
+                                                action.light.toString(),
+                                                TimeConvert.dateToStringFormat(action.timestamp)
+                                            )
+                                        )
+                                    }
+                                }
+                                Divider(color = SecondColor, thickness = 1.dp)
+                            }
                         }
                         // Handle load state for footer loading indicator
                         dataSensorItems.apply {
@@ -346,7 +252,7 @@ fun HistoryTable(dataSensorItems: LazyPagingItems<DataSensorTable>, swipeRefresh
                                 loadState.append is LoadState.Error -> {
                                     item {
                                         Text(
-                                            text = "Error loading more data",
+                                            text = "End of data",
                                             color = Color.Red,
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -382,49 +288,22 @@ fun CellOfHistoryTable(textStyle: TextStyle, col: List<String>) {
                     .padding(3.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = col[i],
-                    style = textStyle
-                )
+                if (i == 4) {
+                    SelectionContainer {
+                        Text(
+                            text = col[i],
+                            style = textStyle
+                        )
+                    }
+
+                } else {
+                    Text(
+                        text = col[i],
+                        style = textStyle
+                    )
+                }
+
             }
         }
     }
 }
-
-
-//private val historyList = listOf(
-//    HistoryData(1, "25", "50", "500", "2024/09/02 12:00:00"), // On
-//    HistoryData(2, "26", "51", "1000", "2024/09/02 12:01:00"), // Off
-//    HistoryData(3, "27", "52", "1000", "2024/09/02 12:02:00"), // Off
-//    HistoryData(4, "28", "53", "1000", "2024/09/02 12:03:00"), // Off
-//    HistoryData(5, "29", "54", "500", "2024/09/02 12:04:00"), // On
-//    HistoryData(6, "30", "55", "1000", "2024/09/02 12:05:00"), // Off
-//    HistoryData(7, "31", "56", "500", "2024/09/02 12:06:00"), // On
-//    HistoryData(8, "32", "57", "500", "2024/09/02 12:07:00"), // On
-//    HistoryData(9, "33", "58", "1000", "2024/09/02 12:08:00"), // Off
-//    HistoryData(10, "34", "59", "500", "2024/09/02 12:09:00"), // On
-//    HistoryData(11, "35", "60", "500", "2024/09/02 12:10:00"), // On
-//    HistoryData(12, "36", "61", "500", "2024/09/02 12:11:00"), // On
-//    HistoryData(13, "37", "62", "1000", "2024/09/02 12:12:00"), // Off
-//    HistoryData(14, "38", "63", "500", "2024/09/02 12:13:00"), // On
-//    HistoryData(15, "39", "64", "500", "2024/09/02 12:14:00"), // On
-//    HistoryData(16, "40", "65", "1000", "2024/09/02 12:15:00"), // Off
-//    HistoryData(17, "41", "66", "500", "2024/09/02 12:16:00"), // On
-//    HistoryData(18, "42", "67", "1000", "2024/09/02 12:17:00"), // Off
-//    HistoryData(19, "43", "68", "500", "2024/09/02 12:18:00"), // On
-//    HistoryData(20, "44", "69", "500", "2024/09/02 12:19:00"), // On
-//    HistoryData(21, "45", "70", "1000", "2024/09/02 12:20:00"), // Off
-//    HistoryData(22, "46", "71", "500", "2024/09/02 12:21:00"), // On
-//    HistoryData(23, "47", "72", "1000", "2024/09/02 12:22:00"), // Off
-//    HistoryData(24, "48", "73", "500", "2024/09/02 12:23:00"), // On
-//)
-
-
-//
-//data class HistoryData(
-//    val id: Int,
-//    val temperature: String,
-//    val humidity: String,
-//    val light: String,
-//    val time: String
-//)

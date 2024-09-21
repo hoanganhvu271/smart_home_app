@@ -42,7 +42,7 @@ fun ComposeChart8(modelProducer: CartesianChartModelProducer, modifier: Modifier
     val labels = listOf("16h", "17h", "18h", "19h", "20h")
 
     val bottomAxis = rememberBottomAxis(
-        valueFormatter = CustomValueFormatter(labels),
+//        valueFormatter = CustomValueFormatter(labels),
     )
 
     CartesianChartHost(
@@ -54,7 +54,7 @@ fun ComposeChart8(modelProducer: CartesianChartModelProducer, modifier: Modifier
                     columnChartColors.map { color ->
                         rememberLineComponent(
                             color = color,
-                            thickness = 16.dp,
+                            thickness = 12.dp,
                             shape = Shape.rounded(40)
                         )
                     }

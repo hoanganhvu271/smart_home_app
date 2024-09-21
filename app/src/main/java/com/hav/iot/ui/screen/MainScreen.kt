@@ -8,17 +8,19 @@ import androidx.navigation.compose.rememberNavController
 import com.hav.iot.navigation.BottomNavigationBar
 import com.hav.iot.navigation.NavigationHost
 import com.hav.iot.viewmodel.DataSensorViewModel
+import com.hav.iot.viewmodel.DeviceActionViewModel
 import com.hav.iot.viewmodel.HomeViewmodel
 
 @Composable
 fun MainScreen(homeViewModel: HomeViewmodel) {
     val navController = rememberNavController()
     val dataSensorViewModel: DataSensorViewModel = DataSensorViewModel()
+    val deviceActionViewModel = DeviceActionViewModel()
     Scaffold(
         bottomBar = {
             BottomNavigationBar(navController)
         }
     ) { innerPadding ->
-        NavigationHost(homeViewModel, navController, Modifier.padding(innerPadding), dataSensorViewModel)
+        NavigationHost(homeViewModel, navController, Modifier.padding(innerPadding), dataSensorViewModel, deviceActionViewModel)
     }
 }

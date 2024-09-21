@@ -39,7 +39,6 @@ class MainActivity : ComponentActivity() {
         }
 
         socketManager.connect()
-        socketManager.sendMessage("Hello from Android")
         if(socketManager.isConnected()){
             Log.d("socket", "Connected")
         }

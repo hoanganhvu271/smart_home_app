@@ -3,6 +3,7 @@ package com.hav.iot.ui.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -28,11 +31,14 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hav.iot.R
@@ -105,6 +111,7 @@ fun MainButton(text: String, onClick: () -> Unit, color: Color) {
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchField(
@@ -151,5 +158,26 @@ fun SearchField(
             cursorColor = Color.Black,
         )
     )
+}
+
+@Composable
+fun EmptyContent() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "No data available",
+            style = TextStyle(
+                fontSize = 16.sp,
+                fontFamily = FontFamily(Font(R.font.notosans)),
+                color = Color.Black,
+            ),
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
 }
 

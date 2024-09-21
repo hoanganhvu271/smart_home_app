@@ -1,10 +1,11 @@
 package com.hav.iot.socket
 
 import android.util.Log
+import com.google.gson.Gson
+import com.hav.iot.data.model.DataSensor
 import io.socket.client.IO
 import io.socket.client.Socket
 import java.net.URISyntaxException
-
 
 class SocketManager {
     private var socket: Socket? = null
@@ -30,7 +31,6 @@ class SocketManager {
         }
     }
 
-
     fun connect() {
         socket?.connect()
     }
@@ -53,4 +53,5 @@ class SocketManager {
     fun sendMessage(message: String) {
         socket?.emit("message", message)
     }
+
 }

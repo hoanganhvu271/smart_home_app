@@ -1,6 +1,12 @@
 package com.hav.iot.ui.screen
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Switch
@@ -23,6 +30,9 @@ import androidx.compose.material.Text
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -31,6 +41,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -47,6 +60,7 @@ import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.hav.iot.R
 import com.hav.iot.data.model.ActionTable
+import com.hav.iot.ui.component.EmptyContent
 import com.hav.iot.ui.component.SearchField
 import com.hav.iot.ui.component.TextHeader
 import com.hav.iot.ui.theme.MainBG
@@ -55,18 +69,23 @@ import com.hav.iot.ui.theme.SecondColor
 import com.hav.iot.ui.theme.ThirdColor
 import com.hav.iot.utils.TimeConvert
 import com.hav.iot.viewmodel.DeviceActionViewModel
+import com.hav.iot.viewmodel.HomeViewmodel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ControllerScreen() {
-
-    val deviceActionViewModel = DeviceActionViewModel()
+fun ControllerScreen(deviceActionViewModel: DeviceActionViewModel) {
 
     val actionList = deviceActionViewModel.deviceActionFlow.collectAsLazyPagingItems()
 
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = false)
     val coroutineScope = rememberCoroutineScope()
+
+    //search
+    val queryText by deviceActionViewModel.filter.collectAsState("")
+
+    //focus
+    val focusManager = LocalFocusManager.current
 
     fun onRefresh() {
         coroutineScope.launch {
@@ -79,8 +98,13 @@ fun ControllerScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .pointerInput(Unit){
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                })
+            }
             .background(SecondColor)
-            .padding(top = 20.dp, start = 20.dp, end = 20.dp, bottom = 55.dp)
+            .padding(top = 20.dp, start = 20.dp, end = 20.dp, bottom = 45.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxHeight(),
@@ -88,7 +112,7 @@ fun ControllerScreen() {
             Spacer(modifier = Modifier.height(3.dp))
             TextHeader(text = "Action")
             Spacer(modifier = Modifier.height(10.dp))
-            SearchField(searchQuery = "", onQueryChanged = {}, Modifier.fillMaxWidth())
+            SearchField(searchQuery = queryText, onQueryChanged = deviceActionViewModel::onQueryTextChanged, Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(20.dp))
             StatusTable(actionList = actionList, swipeRefreshState = swipeRefreshState) { onRefresh() }
         }
@@ -96,17 +120,19 @@ fun ControllerScreen() {
 }
 
 @Composable
-fun ControllerItem(icon: Int, name: String, status: Boolean, action: (ac: Int) -> Unit){
-    val checkedStatus = remember { mutableStateOf(status) }
+fun ControllerItem(icon: Int, name: String, realStatus : Int, actionStatus : Int, viewModel: HomeViewmodel, id : Int){
     val customFont = FontFamily(Font(R.font.notosans))
-    var color = if (checkedStatus.value) OnColor else MainBG
+
+    val checkedStatus = remember { mutableIntStateOf(actionStatus) }
+
+    val color = remember(realStatus) { mutableIntStateOf(realStatus) }
 
     Box(
         modifier = Modifier
             .width(160.dp)
             .height(120.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(color)
+            .background(if (color.intValue == 1) OnColor else MainBG)
             .padding(5.dp)
     ) {
         Column(
@@ -127,17 +153,16 @@ fun ControllerItem(icon: Int, name: String, status: Boolean, action: (ac: Int) -
                     modifier = Modifier.size(40.dp),
                 )
                 Switch(
-                    checked = checkedStatus.value,
-                    onCheckedChange = {
-                        if(it){
-                            action(1)
+                    checked = checkedStatus.intValue == 1,
+                    onCheckedChange = { isChecked ->
+                        Log.d("vu", isChecked.toString() + id.toString())
+                        if(isChecked){
+                            viewModel.changeButtonState(1, id)
                         }
                         else{
-                            action(0)
+                            viewModel.changeButtonState(0, id)
                         }
-                      
-                        checkedStatus.value = it
-                        color = if (it) OnColor else MainBG
+                        checkedStatus.value = if (isChecked) 1 else 0
                     },
                     modifier = Modifier.scale(1f),
                     colors = SwitchDefaults.colors(
@@ -169,15 +194,16 @@ fun ControllerItem(icon: Int, name: String, status: Boolean, action: (ac: Int) -
 
 
 @Composable
-fun LongControllerItem(icon: Int, name: String, status: Boolean, action : (ac: Int) -> Unit) {
-    val checkedStatus = remember { mutableStateOf(status) }
-    var color = if (checkedStatus.value) OnColor else MainBG
+fun LongControllerItem(icon: Int, name: String, realStatus : Int, actionStatus : Int, viewModel: HomeViewmodel, id: Int){
+    val checkedStatus = remember { mutableIntStateOf(actionStatus) }
+
+    val color = remember(realStatus) { mutableIntStateOf(realStatus) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(125.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(color)
+            .background(if (color.intValue == 1) OnColor else MainBG)
             .padding(8.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -235,17 +261,16 @@ fun LongControllerItem(icon: Int, name: String, status: Boolean, action : (ac: I
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Switch(
-                    checked = checkedStatus.value,
-                    onCheckedChange = {
-                        if(it){
-                            action(1)
+                    checked = checkedStatus.intValue == 1,
+                    onCheckedChange = { isChecked ->
+                        Log.d("vu", isChecked.toString() + id.toString())
+                        if(isChecked){
+                            viewModel.changeButtonState(1, id)
                         }
                         else{
-                            action(0)
+                            viewModel.changeButtonState(0, id)
                         }
-
-                        checkedStatus.value = it
-                        color = if (it) OnColor else MainBG
+                        checkedStatus.intValue = if (isChecked) 1 else 0
                     },
                     modifier = Modifier.scale(1f),
                     colors = SwitchDefaults.colors(
@@ -300,26 +325,33 @@ fun StatusTable(actionList: LazyPagingItems<ActionTable>, swipeRefreshState: Swi
                             modifier = Modifier
                                 .fillMaxSize()
                         ) {
-                            items(actionList.itemCount) { index ->
-                                val action = actionList[index]
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(5.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    if (action != null) {
-                                        CellOfTable(
-                                            textStyle = TextStyle(
-                                                fontSize = 14.sp,
-                                                fontFamily = FontFamily(Font(R.font.notosans))
-                                            ),
-                                            col1 = action.id.toString(),
-                                            col2 = action.deviceName.toString(),
-                                            col3 =  if (action.action == 1) "Turn on" else "Turn off",
-                                            col4 = TimeConvert.dateToStringFormat(action.timestamp)
-                                        )
+                            if(actionList.itemCount == 0){
+                                item {
+                                   EmptyContent()
+                                }
+                            }
+                            else{
+                                items(actionList.itemCount) { index ->
+                                    val action = actionList[index]
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(5.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        if (action != null) {
+                                            CellOfTable(
+                                                textStyle = TextStyle(
+                                                    fontSize = 14.sp,
+                                                    fontFamily = FontFamily(Font(R.font.notosans))
+                                                ),
+                                                col1 = action.id.toString(),
+                                                col2 = action.device_id  ?: " ",
+                                                col3 =  if (action.action == 1) "Turn on" else "Turn off",
+                                                col4 = TimeConvert.dateToStringFormat(action.timestamp)
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -416,11 +448,14 @@ fun CellOfTable(textStyle: TextStyle, col1: String, col2: String, col3: String, 
                 .padding(3.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = col4,
-                style = textStyle
-            )
+            SelectionContainer {
+                Text(
+                    text = col4,
+                    style = textStyle,
+                )
+            }
         }
+
     }
 }
 

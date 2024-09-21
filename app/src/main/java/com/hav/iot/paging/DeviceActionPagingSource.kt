@@ -34,7 +34,17 @@ class DeviceActionPagingSource (private val apiRepository: ApiRepository<Any?>,
                     prevKey = if (currentPage == 1) null else currentPage - 1,
                     nextKey = nextKey
                 )
-            } else {
+            } else if(response.code() == 404){
+                val data = emptyList<ActionTable>()
+                val nextKey = null
+
+                return LoadResult.Page(
+                    data = data,
+                    prevKey = null,
+                    nextKey = nextKey
+                )
+            }
+            else {
                 return LoadResult.Error(Exception("Failed to load data"))
             }
         } catch (e: Exception) {

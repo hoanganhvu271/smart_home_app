@@ -1,9 +1,12 @@
 package com.hav.iot.ui.screen
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -31,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -55,7 +59,7 @@ fun ProfileScreen() {
             )
     ) {
         Column {
-            Box(modifier = Modifier.padding(start = 10.dp, top = 10.dp)){
+            Box(modifier = Modifier.padding(start = 10.dp, top = 10.dp)) {
                 TextHeader(text = "Profile")
             }
 
@@ -103,7 +107,10 @@ fun TopProfileLayout() {
                         .size(60.dp)
                         .clip(CircleShape)
                 ) {
-                    Image(painter = painterResource(id = R.drawable.vu), contentDescription = "avatar")
+                    Image(
+                        painter = painterResource(id = R.drawable.vu),
+                        contentDescription = "avatar"
+                    )
                 }
                 Column(
                     modifier = Modifier
@@ -114,9 +121,10 @@ fun TopProfileLayout() {
                         text = stringResource(id = R.string.full_name),
                         style = TextStyle(
                             color = Color.Black,
-                            fontFamily = font ,
+                            fontFamily = font,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp)
+                            fontSize = 18.sp
+                        )
 
                     )
 
@@ -124,9 +132,10 @@ fun TopProfileLayout() {
                         text = stringResource(id = R.string.user_name),
                         style = TextStyle(
                             color = Color.Black,
-                            fontFamily = font ,
+                            fontFamily = font,
                             fontWeight = FontWeight.Normal,
-                            fontSize = 14.sp)
+                            fontSize = 14.sp
+                        )
                     )
                 }
             }
@@ -136,9 +145,10 @@ fun TopProfileLayout() {
                 text = stringResource(id = R.string.description),
                 style = TextStyle(
                     color = Color.Black,
-                    fontFamily = font ,
+                    fontFamily = font,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 14.sp)
+                    fontSize = 14.sp
+                )
             )
 
             FlowRow(modifier = Modifier.padding(vertical = 5.dp)) {
@@ -159,9 +169,10 @@ fun TopProfileLayout() {
                                 text = it.text,
                                 style = TextStyle(
                                     color = Color.Black,
-                                    fontFamily = font ,
+                                    fontFamily = font,
                                     fontWeight = FontWeight.Normal,
-                                    fontSize = 14.sp)
+                                    fontSize = 14.sp
+                                )
                             )
                         }
 
@@ -173,6 +184,7 @@ fun TopProfileLayout() {
 
     }
 }
+
 @Composable
 fun ImageTextContent(
     icon: @Composable () -> Unit,
@@ -205,9 +217,10 @@ fun MainProfileContent() {
                 text = "Results",
                 style = TextStyle(
                     color = Color.Black,
-                    fontFamily = font ,
+                    fontFamily = font,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp)
+                    fontSize = 16.sp
+                )
             )
             PopularContentList()
 
@@ -224,20 +237,19 @@ fun MainProfileContent() {
                             .size(40.dp)
                             .padding(6.dp)
                     )
-                }
-                ,
+                },
                 text =
                 {
                     Text(
                         text = "Repositories",
                         style = TextStyle(
                             color = Color.Black,
-                            fontFamily = font ,
+                            fontFamily = font,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp)
+                            fontSize = 14.sp
                         )
-                }
-                ,
+                    )
+                },
                 endItem =
                 {
                     Text(
@@ -245,9 +257,10 @@ fun MainProfileContent() {
                         text = "31",
                         style = TextStyle(
                             color = Color.Black,
-                            fontFamily = font ,
+                            fontFamily = font,
                             fontWeight = FontWeight.Normal,
-                            fontSize = 14.sp)
+                            fontSize = 14.sp
+                        )
                     )
                 }
 
@@ -270,12 +283,12 @@ fun MainProfileContent() {
                         text = "Starred",
                         style = TextStyle(
                             color = Color.Black,
-                            fontFamily = font ,
+                            fontFamily = font,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp)
+                            fontSize = 14.sp
+                        )
                     )
-                }
-                ,
+                },
                 endItem =
                 {
                     Text(
@@ -283,9 +296,10 @@ fun MainProfileContent() {
                         text = "10",
                         style = TextStyle(
                             color = Color.Black,
-                            fontFamily = font ,
+                            fontFamily = font,
                             fontWeight = FontWeight.Normal,
-                            fontSize = 14.sp)
+                            fontSize = 14.sp
+                        )
                     )
                 }
 
@@ -298,7 +312,7 @@ fun MainProfileContent() {
 fun PopularContentList() {
     LazyRow {
         items(
-          profilePopularList,
+            profilePopularList,
         ) { item ->
             Surface(
                 modifier = Modifier
@@ -307,7 +321,13 @@ fun PopularContentList() {
                 shape = RoundedCornerShape(8.dp),
                 border = BorderStroke(1.dp, SecondColor)
             ) {
-                Column(modifier = Modifier.padding(5.dp)) {
+                val context = LocalContext.current
+                Column(modifier = Modifier
+                    .padding(5.dp)
+                    .clickable {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
+                        context.startActivity(intent)
+                    }) {
                     Row(
                         modifier = Modifier.padding(vertical = 5.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -324,9 +344,10 @@ fun PopularContentList() {
                             text = item.name,
                             style = TextStyle(
                                 color = Color.Black,
-                                fontFamily = font ,
+                                fontFamily = font,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp)
+                                fontSize = 14.sp
+                            )
                         )
                     }
 
@@ -335,9 +356,10 @@ fun PopularContentList() {
                         text = item.description,
                         style = TextStyle(
                             color = Color.Black,
-                            fontFamily = font ,
+                            fontFamily = font,
                             fontWeight = FontWeight.Normal,
-                            fontSize = 14.sp)
+                            fontSize = 14.sp
+                        )
                     )
 
                     Row(
@@ -410,7 +432,6 @@ fun GitContentItem(
 }
 
 
-
 val imageTextList = listOf(
     ImageTextList(R.drawable.ic_msv, "B21DCCN795"),
     ImageTextList(R.drawable.ic_mail, "hoanganhvu271103@gmail.com"),
@@ -430,18 +451,19 @@ data class FeatureList(
 )
 
 val profilePopularList = listOf(
-    ProfilePopularList("Report", "Link to Report ...", "1", "PDF"),
-    ProfilePopularList("Github Project ", "Link to Git Project...", "1", "Github"),
-    ProfilePopularList("API Docs", "Link to API Docs...", "2", "Postman")
+    ProfilePopularList("Report", "Link to Report ...", "1", "PDF", "https://dashboard.render.com"),
+    ProfilePopularList("Github Project ", "Link to Git Project...", "1", "Github", "https://github.com/hoanganhvu271/smart_home_app.git"),
+    ProfilePopularList("API Docs", "Link to API Docs...", "2", "Postman", "https://iot-server-siz9.onrender.com/api-docs")
 )
 
 data class ProfilePopularList(
     val name: String,
     val description: String,
     val star: String,
-    val language: String
+    val language: String,
+    val url: String
 )
 
-private val  font = FontFamily(
-Font(R.font.notosans)
+private val font = FontFamily(
+    Font(R.font.notosans)
 )

@@ -29,6 +29,14 @@ import retrofit2.Response
 class DataSensorViewModel : ViewModel() {
     private val apiRepository: ApiRepository<Any?> = ApiRepository()
 
+    //sort dialog options state
+    private val _sortOptions = MutableLiveData<List<Boolean>>()
+    val sortOptions: LiveData<List<Boolean>> = _sortOptions
+
+    //filter
+    private val _filterOptions = MutableLiveData<List<Boolean>>()
+    val filterOptions: LiveData<List<Boolean>> = _filterOptions
+
     private val _dataSensorList = MutableLiveData<List<DataSensorTable>>()
     val dataSensorList: LiveData<List<DataSensorTable>> = _dataSensorList
 
@@ -41,6 +49,7 @@ class DataSensorViewModel : ViewModel() {
     private val _sortBy = MutableLiveData<String>()
     val sortBy: LiveData<String> = _sortBy
 
+    // order
     private val _order = MutableLiveData<String>()
     val order: LiveData<String> = _order
 
@@ -77,10 +86,78 @@ class DataSensorViewModel : ViewModel() {
     }
 
     fun onQueryTextChanged(query: String) {
-//        Log.d("vu", query + " " + _filter.value)
         viewModelScope.launch {
             _filter.value = query
-            reload()  // Reload immediately without delay
+            Log.d("vu", _filterBy.value.toString() + " " + _sortBy.value.toString())
+            reload()
+        }
+    }
+
+    fun changeOptions(idSort : Int, idFilter : Int){
+        changeFilterOption(idSort)
+        changeSortOption(idFilter)
+        reload()
+
+
+
+    }
+
+    private fun changeFilterOption(id: Int){
+        val list = _filterOptions.value?.toMutableList()!!
+        for (i in list.indices){
+            list[i] = false
+        }
+        list[id] = true
+        _filterOptions.value = list
+        when(id){
+            0 -> {
+                _filterBy.value = "temperature"
+            }
+            1 -> {
+                _filterBy.value = "humidity"
+            }
+            2 -> {
+                _filterBy.value = "light"
+            }
+            3 -> {
+                _filterBy.value = "timestamp"
+            }
+        }
+    }
+
+    private fun changeSortOption(id : Int){
+//        Log.d("vu", "hello")
+
+            val list = _sortOptions.value?.toMutableList()!!
+            for (i in list.indices){
+                list[i] = false
+            }
+            list[id] = true
+            _sortOptions.value = list
+            when(id){
+                0 -> {
+                    _sortBy.value = "temperature"
+                }
+                1 -> {
+                    _sortBy.value = "humidity"
+                }
+                2 -> {
+                    _sortBy.value = "light"
+                }
+                3 -> {
+                    _sortBy.value = "timestamp"
+                }
+            }
+    }
+
+    fun setOrder(): () -> Unit {
+        return {
+            if (_order.value == "DESC") {
+                _order.value = "ASC"
+            } else {
+                _order.value = "DESC"
+            }
+            reload()
         }
     }
 
@@ -92,6 +169,8 @@ class DataSensorViewModel : ViewModel() {
             _order.value = "DESC"
             _filter.value = ""
             _filterBy.value = ""
+            _sortOptions.value = listOf(false, false, false, true)
+            _filterOptions.value = listOf(false, false, false, true)
         }
     }
 }
