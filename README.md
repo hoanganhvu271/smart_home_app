@@ -16,8 +16,7 @@ Hardware:
 
 + Esp32, DHT11, LDR
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
-
+<img src="https://github.com/hoanganhvu271/smart_home_app/blob/main/image/1.png" alt="App Screenshot" width="400"/>
 
 
 ## Authors
@@ -29,8 +28,11 @@ Hardware:
 
 ## Demo
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
-
+<img src="https://github.com/hoanganhvu271/smart_home_app/blob/main/image/2.png" alt="App Screenshot" width="400"/>
+<img src="https://github.com/hoanganhvu271/smart_home_app/blob/main/image/3.png" alt="App Screenshot" width="400"/>
+<img src="https://github.com/hoanganhvu271/smart_home_app/blob/main/image/4.png" alt="App Screenshot" width="400"/>
+<img src="https://github.com/hoanganhvu271/smart_home_app/blob/main/image/5.png" alt="App Screenshot" width="400"/>
+<img src="https://github.com/hoanganhvu271/smart_home_app/blob/main/image/6.png" alt="App Screenshot" width="400"/>
 
 ## API Reference
 Backend Server: https://github.com/hoanganhvu271/iot-server.git
