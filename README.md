@@ -20,8 +20,6 @@ Hardware:
 
 
 
-
-
 ## Authors
 
 - [@hoanganhvu271](https://www.facebook.com/hoanganhvu03)
@@ -53,13 +51,13 @@ API Docs: https://iot-server-siz9.onrender.com/api-docs
 #### Turn on Led
 
 ```http
-  GET /api/turn-on
+  POST /api/turn-on
 ```
 
 #### Turn off Led
 
 ```http
-  GET /api/turn-off
+  POST /api/turn-off
 ```
 
 
