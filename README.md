@@ -16,7 +16,7 @@ Hardware:
 
 + Esp32, DHT11, LDR
 
-<img src="https://github.com/hoanganhvu271/smart_home_app/blob/main/image/1.png" alt="App Screenshot" width="600"/>
+<img src="https://github.com/hoanganhvu271/smart_home_app/blob/main/image/1.png" alt="App Screenshot" width="800"/>
 
 
 ## Authors
