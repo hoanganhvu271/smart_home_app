@@ -72,15 +72,13 @@ class HomeViewmodel : ViewModel() {
         _lightChartData.value = listOf(0, 0, 0, 0, 0, 0)
     }
 
-//    private fun updateChartData()
-
     fun updateMessage(message: String) {
         Log.d("vu", message)
         val data = Gson().fromJson(message, DataSensor::class.java)
         try {
             _temperature.value = data.temp.toString() + " °C"
             _humidity.value = data.humid.toString() + " %"
-            _light.value = data.light.toString() + " lx"
+            _light.value = data.light.toString() 
             updateChart(data.temp, data.humid, data.light)
         } catch (e: Exception) {
             Log.d("vu", e.toString())

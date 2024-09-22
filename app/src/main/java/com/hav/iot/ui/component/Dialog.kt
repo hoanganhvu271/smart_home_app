@@ -219,6 +219,7 @@ fun FilterDialog( sort : List<Boolean>, filter : List<Boolean>,onDismiss: () -> 
                                     break
                                 }
                             }
+                            break
                         }
                     }
 

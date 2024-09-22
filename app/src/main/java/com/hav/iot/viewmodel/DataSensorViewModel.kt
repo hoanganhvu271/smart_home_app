@@ -94,11 +94,9 @@ class DataSensorViewModel : ViewModel() {
     }
 
     fun changeOptions(idSort : Int, idFilter : Int){
-        changeFilterOption(idSort)
-        changeSortOption(idFilter)
+        changeSortOption(idSort)
+        changeFilterOption(idFilter)
         reload()
-
-
 
     }
 

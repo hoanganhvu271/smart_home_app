@@ -11,7 +11,6 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface ApiService {
-
     @POST("api/turn-on")
     suspend fun getOnLed(@Query("id") deviceId : Int): Response<ResponseBody>
 
