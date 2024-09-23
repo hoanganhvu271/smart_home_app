@@ -190,13 +190,13 @@ fun ChartCard(name: String, modelProducer: CartesianChartModelProducer, type: St
 
 @Composable
 fun StatusBar(temperature: String, humidity: String, light: String, dust: String) {
-    val color = remember(temperature){getStatus(temperature)}
+//    val color = remember(temperature){getStatus(temperature)}
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .background(
-                color
+                normalStatus
             )
     ) {
         Box(
