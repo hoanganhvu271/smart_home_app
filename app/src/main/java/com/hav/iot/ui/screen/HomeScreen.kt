@@ -48,10 +48,6 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.hav.iot.R
 import com.hav.iot.ui.component.TextHeader
-import com.hav.iot.ui.theme.MainBG
-import com.hav.iot.ui.theme.OnColor
-import com.hav.iot.ui.theme.SecondColor
-import com.hav.iot.ui.theme.ThirdColor
 import com.hav.iot.utils.getCurrentTime
 import com.hav.iot.viewmodel.HomeViewmodel
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
@@ -62,6 +58,8 @@ import kotlinx.coroutines.launch
 import com.hav.iot.ui.component.ComposeChart8
 import com.hav.iot.ui.component.ComposeChart1
 import com.hav.iot.ui.component.TextHeader2
+import com.hav.iot.ui.theme.*
+import com.hav.iot.utils.Status.Companion.getStatus
 
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalFoundationApi::class)
@@ -100,7 +98,7 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
 
     LaunchedEffect(tempChartData, humidChartData, lightChartData) {
         modelProducerColumn1.runTransaction { columnSeries { humidChartData?.let { series(y = it) } } }
-        modelProducerLine.runTransaction { lineSeries { tempChartData?.let { series(y = it) } }}
+        modelProducerLine.runTransaction { lineSeries { tempChartData?.let { series(y = it) } } }
         modelProducerColumn2.runTransaction { columnSeries { lightChartData?.let { series(y = it) } } }
     }
 
@@ -113,7 +111,7 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 20.dp, start = 20.dp, end = 20.dp, bottom = 10.dp)
-            ) {
+        ) {
             TextHeader(text = "PTIT Smart Room")
             Spacer(modifier = Modifier.size(20.dp))
             TimeShow()
@@ -174,7 +172,7 @@ fun ChartCard(name: String, modelProducer: CartesianChartModelProducer, type: St
                     style = TextStyle(fontWeight = FontWeight.Bold, fontFamily = font)
                 )
                 Spacer(modifier = Modifier.size(10.dp))
-                if(type == "column") {
+                if (type == "column") {
                     ComposeChart8(modelProducer = modelProducer, modifier = Modifier.fillMaxWidth())
                 } else {
                     ComposeChart1(modelProducer = modelProducer, modifier = Modifier.fillMaxWidth())
@@ -186,17 +184,14 @@ fun ChartCard(name: String, modelProducer: CartesianChartModelProducer, type: St
 }
 
 @Composable
-fun StatusBar( temperature: String, humidity: String, light: String) {
+fun StatusBar(temperature: String, humidity: String, light: String) {
+    val color = remember(temperature){getStatus(temperature)}
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(MainBG, OnColor),
-                    start = Offset(0f, 0f),
-                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
-                )
+                color
             )
     ) {
         Box(
@@ -371,11 +366,32 @@ fun ControllerContainer(viewmodel: HomeViewmodel, actionColorList: List<Int>, ac
                     .padding(5.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                ControllerItem(icon = R.drawable.ic_light, name = "Smart Light",  actionColorList[0], actionList[0], viewmodel, 0 )
-                ControllerItem(icon = R.drawable.ic_ac, name = "Smart AC", actionColorList[1], actionList[1], viewmodel, 1)
+                ControllerItem(
+                    icon = R.drawable.ic_light,
+                    name = "Smart Light",
+                    actionColorList[0],
+                    actionList[0],
+                    viewmodel,
+                    0
+                )
+                ControllerItem(
+                    icon = R.drawable.ic_ac,
+                    name = "Smart AC",
+                    actionColorList[1],
+                    actionList[1],
+                    viewmodel,
+                    1
+                )
             }
             Spacer(modifier = Modifier.height(10.dp))
-            LongControllerItem(icon = R.drawable.ic_fan, name = "Smart Fan", actionColorList[2], actionList[2], viewmodel, 2)
+            LongControllerItem(
+                icon = R.drawable.ic_fan,
+                name = "Smart Fan",
+                actionColorList[2],
+                actionList[2],
+                viewmodel,
+                2
+            )
             Spacer(modifier = Modifier.height(10.dp))
         }
     }
