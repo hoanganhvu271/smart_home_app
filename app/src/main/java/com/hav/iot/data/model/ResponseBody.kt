@@ -15,7 +15,8 @@ data class DataSensorTable(
     val temperature : Int,
     val humidity :Int,
     val light: Int,
-    val timestamp : Date
+    val timestamp : Date,
+    val dust : Int
 )
 
 data class ActionTable(

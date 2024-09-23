@@ -42,6 +42,9 @@ class HomeViewmodel : ViewModel() {
     private val _light = MutableLiveData<String>()
     val light: LiveData<String> = _light
 
+    private val _dust = MutableLiveData<String>()
+    val dust: LiveData<String> = _dust
+
     //chart data
     private val _tempChartData = MutableLiveData<List<Int>>()
     val tempChartData: LiveData<List<Int>> = _tempChartData
@@ -51,6 +54,9 @@ class HomeViewmodel : ViewModel() {
 
     private val _lightChartData = MutableLiveData<List<Int>>()
     val lightChartData: LiveData<List<Int>> = _lightChartData
+
+    private val _dustChartData = MutableLiveData<List<Int>>()
+    val dustChartData: LiveData<List<Int>> = _dustChartData
 
 
     fun changeButtonState(action: Int, id : Int){
@@ -68,6 +74,7 @@ class HomeViewmodel : ViewModel() {
         _tempChartData.value = listOf(0, 0, 0, 0, 0, 0)
         _humidChartData.value = listOf(0, 0, 0, 0, 0, 0)
         _lightChartData.value = listOf(0, 0, 0, 0, 0, 0)
+        _dustChartData.value = listOf(0, 0, 0, 0, 0, 0)
     }
 
     fun updateMessage(message: String) {
@@ -76,8 +83,9 @@ class HomeViewmodel : ViewModel() {
         try {
             _temperature.value = data.temp.toString() + " °C"
             _humidity.value = data.humid.toString() + " %"
-            _light.value = data.light.toString() 
-            updateChart(data.temp, data.humid, data.light)
+            _light.value = data.light.toString()
+            _dust.value = data.dust.toString()
+            updateChart(data.temp, data.humid, data.light, data.dust)
 
             updateLedStatus(data.led1, data.led2, data.led3)
 
@@ -100,7 +108,7 @@ class HomeViewmodel : ViewModel() {
         _actionColorList.value = colorList
     }
 
-    private fun updateChart(temp: Int, humid: Int, light: Int) {
+    private fun updateChart(temp: Int, humid: Int, light: Int, dust : Int) {
         val tempData = _tempChartData.value?.toMutableList()!!
         val humidData = _humidChartData.value?.toMutableList()!!
         val lightData = _lightChartData.value?.toMutableList()!!
@@ -116,6 +124,10 @@ class HomeViewmodel : ViewModel() {
         lightData.removeAt(0)
         lightData.add(light)
         _lightChartData.value = lightData
+
+        val dustData = _dustChartData.value?.toMutableList()!!
+        dustData.removeAt(0)
+        dustData.add(dust)
 
 //        Log.d("vu", tempData.toString())
 //        Log.d("vu", humidData.toString())

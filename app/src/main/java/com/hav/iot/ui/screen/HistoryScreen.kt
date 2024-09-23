@@ -178,7 +178,7 @@ fun HistoryTable(
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily(Font(R.font.notosans))
                 ),
-                col = listOf("ID", "Temp (°C)", "Hum (%)", "Light", "Time")
+                col = listOf("ID", "Temp (°C)", "Hum (%)", "Light", "Dust", "Time")
             )
 
             Spacer(modifier = Modifier.height(5.dp))
@@ -225,6 +225,7 @@ fun HistoryTable(
                                                 action.temperature.toString(),
                                                 action.humidity.toString(),
                                                 action.light.toString(),
+                                                action.dust.toString(),
                                                 TimeConvert.dateToStringFormat(action.timestamp)
                                             )
                                         )

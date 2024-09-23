@@ -75,6 +75,7 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
     val temperature by viewmodel.temperature.observeAsState(initial = "")
     val humidity by viewmodel.humidity.observeAsState(initial = "")
     val light by viewmodel.light.observeAsState(initial = "")
+    val dust by viewmodel.dust.observeAsState(initial = "")
 
 
     //page slide
@@ -86,6 +87,7 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
     val tempChartData by viewmodel.tempChartData.observeAsState()
     val humidChartData by viewmodel.humidChartData.observeAsState()
     val lightChartData by viewmodel.lightChartData.observeAsState()
+    val dustChartData by viewmodel.dustChartData.observeAsState()
 
 //    Log.d("vu", "HomeScreen: $tempChartData")
 //    Log.d("vu", "HomeScreen: $humidChartData")
@@ -94,12 +96,14 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
     val modelProducerColumn1 = remember { CartesianChartModelProducer() }
     val modelProducerLine = remember { CartesianChartModelProducer() }
     val modelProducerColumn2 = remember { CartesianChartModelProducer() }
+    val modelProducerLine2 = remember { CartesianChartModelProducer() }
 
 
     LaunchedEffect(tempChartData, humidChartData, lightChartData) {
         modelProducerColumn1.runTransaction { columnSeries { humidChartData?.let { series(y = it) } } }
         modelProducerLine.runTransaction { lineSeries { tempChartData?.let { series(y = it) } } }
         modelProducerColumn2.runTransaction { columnSeries { lightChartData?.let { series(y = it) } } }
+        modelProducerLine2.runTransaction { lineSeries { dustChartData?.let { series(y = it) } } }
     }
 
     Box(
@@ -117,7 +121,7 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
             TimeShow()
             Spacer(modifier = Modifier.size(15.dp))
             Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                StatusBar(temperature, humidity, light)
+                StatusBar(temperature, humidity, light, dust)
                 Spacer(modifier = Modifier.size(8.dp))
                 LazyColumn {
                     item {
@@ -125,7 +129,7 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
                         Spacer(modifier = Modifier.size(25.dp))
                         TextHeader2(text = "Data")
                         HorizontalPager(
-                            count = 3,
+                            count = 4,
                             state = pagerState,
                             modifier = Modifier.weight(1f)
                         ) { page ->
@@ -133,6 +137,7 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
                                 0 -> ChartCard("Humidity (%)", modelProducer = modelProducerColumn1, type = "column")
                                 1 -> ChartCard("Temperature (°C)", modelProducer = modelProducerLine, type = "line")
                                 2 -> ChartCard("Light (lux)", modelProducer = modelProducerColumn2, type = "column")
+                                3 -> ChartCard("Dust (mg/m3)", modelProducer = modelProducerLine2, type = "column")
                             }
                         }
                         Spacer(modifier = Modifier.size(5.dp))
@@ -184,7 +189,7 @@ fun ChartCard(name: String, modelProducer: CartesianChartModelProducer, type: St
 }
 
 @Composable
-fun StatusBar(temperature: String, humidity: String, light: String) {
+fun StatusBar(temperature: String, humidity: String, light: String, dust: String) {
     val color = remember(temperature){getStatus(temperature)}
     Box(
         modifier = Modifier
@@ -229,6 +234,12 @@ fun StatusBar(temperature: String, humidity: String, light: String) {
                         R.drawable.ic_light,
                         "Light",
                         light,
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatusItem(
+                        R.drawable.ic_light,
+                        "Dust",
+                        dust,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -340,7 +351,7 @@ fun TimeShow() {
 @OptIn(ExperimentalPagerApi::class)
 private suspend fun nextPage(pagerState: PagerState) {
     val currentPage = pagerState.currentPage
-    pagerState.animateScrollToPage((currentPage + 1) % 3)
+    pagerState.animateScrollToPage((currentPage + 1) % 4)
 }
 
 private val font = androidx.compose.ui.text.font.FontFamily(
