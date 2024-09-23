@@ -24,8 +24,6 @@ import kotlin.math.floor
 class HomeViewmodel : ViewModel() {
     private val apiRepository = ApiRepository<Any>()
 
-
-
     //color box
     private val _actionColorList = MutableLiveData<List<Int>>()
     val actionColorList: LiveData<List<Int>> = _actionColorList
@@ -80,9 +78,26 @@ class HomeViewmodel : ViewModel() {
             _humidity.value = data.humid.toString() + " %"
             _light.value = data.light.toString() 
             updateChart(data.temp, data.humid, data.light)
+
+            updateLedStatus(data.led1, data.led2, data.led3)
+
         } catch (e: Exception) {
             Log.d("vu", e.toString())
         }
+    }
+
+    private fun updateLedStatus(led1: Int, led2: Int, led3: Int) {
+        val list = _actionList.value?.toMutableList()!!
+        list[0] = led1
+        list[1] = led2
+        list[2] = led3
+        _actionList.value = list
+
+        val colorList = _actionColorList.value?.toMutableList()!!
+        colorList[0] = led1
+        colorList[1] = led2
+        colorList[2] = led3
+        _actionColorList.value = colorList
     }
 
     private fun updateChart(temp: Int, humid: Int, light: Int) {

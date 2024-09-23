@@ -10,21 +10,13 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.hav.iot.data.api.ApiRepository
-import com.hav.iot.data.model.DataResponse
 import com.hav.iot.data.model.DataSensorTable
-import com.hav.iot.data.model.ResponseBody
 import com.hav.iot.paging.DataSensorPagingSource
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class DataSensorViewModel : ViewModel() {
     private val apiRepository: ApiRepository<Any?> = ApiRepository()
