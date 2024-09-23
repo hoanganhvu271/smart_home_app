@@ -63,8 +63,8 @@ class HomeViewmodel : ViewModel() {
 
 
     init {
-        _actionList.value = listOf(0, 0, 0)
-        _actionColorList.value = listOf(0, 0, 0)
+        _actionList.value = listOf(0, 0, 0, 0)
+        _actionColorList.value = listOf(0, 0, 0, 0)
         _tempChartData.value = listOf(0, 0, 0, 0, 0, 0)
         _humidChartData.value = listOf(0, 0, 0, 0, 0, 0)
         _lightChartData.value = listOf(0, 0, 0, 0, 0, 0)
@@ -79,24 +79,26 @@ class HomeViewmodel : ViewModel() {
             _light.value = data.light.toString() 
             updateChart(data.temp, data.humid, data.light)
 
-            updateLedStatus(data.led1, data.led2, data.led3)
+            updateLedStatus(data.led1, data.led2, data.led3, data.led4)
 
         } catch (e: Exception) {
             Log.d("vu", e.toString())
         }
     }
 
-    private fun updateLedStatus(led1: Int, led2: Int, led3: Int) {
+    private fun updateLedStatus(led1: Int, led2: Int, led3: Int, led4: Int) {
         val list = _actionList.value?.toMutableList()!!
         list[0] = led1
         list[1] = led2
         list[2] = led3
+        list[3] = led4
         _actionList.value = list
 
         val colorList = _actionColorList.value?.toMutableList()!!
         colorList[0] = led1
         colorList[1] = led2
         colorList[2] = led3
+        colorList[3] = led4
         _actionColorList.value = colorList
     }
 

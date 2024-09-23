@@ -393,6 +393,14 @@ fun ControllerContainer(viewmodel: HomeViewmodel, actionColorList: List<Int>, ac
                 2
             )
             Spacer(modifier = Modifier.height(10.dp))
+            LongControllerItem(
+                icon = R.drawable.ic_fan,
+                name = "Smart Su",
+                actionColorList[3],
+                actionList[3],
+                viewmodel,
+                3
+            )
         }
     }
 }

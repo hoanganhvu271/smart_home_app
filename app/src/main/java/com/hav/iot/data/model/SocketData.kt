@@ -6,5 +6,6 @@ data class DataSensor (
     val light : Int,
     val led1 : Int,
     val led2 : Int,
-    val led3 : Int
+    val led3 : Int,
+    val led4 : Int
 )
