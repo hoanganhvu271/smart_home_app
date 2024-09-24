@@ -69,12 +69,16 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
     //action status:
     val actionList by viewmodel.actionList.observeAsState(initial = listOf(0, 0, 0))
     val actionColorList by viewmodel.actionColorList.observeAsState(initial = listOf(0, 0, 0))
+//
+//    val actionList by viewmodel.actionList.observeAsState(initial = listOf(0, 0, 0, 0))
+//    val actionColorList by viewmodel.actionColorList.observeAsState(initial = listOf(0, 0, 0, 0))
 
 
     //status data
     val temperature by viewmodel.temperature.observeAsState(initial = "")
     val humidity by viewmodel.humidity.observeAsState(initial = "")
     val light by viewmodel.light.observeAsState(initial = "")
+    val dust by viewmodel.dust.observeAsState(initial = "")
 
 
     //page slide
@@ -86,20 +90,21 @@ fun HomeScreen(viewmodel: HomeViewmodel) {
     val tempChartData by viewmodel.tempChartData.observeAsState()
     val humidChartData by viewmodel.humidChartData.observeAsState()
     val lightChartData by viewmodel.lightChartData.observeAsState()
+//    val dustChartData by viewmodel.dustChartData.observeAsState()
 
-//    Log.d("vu", "HomeScreen: $tempChartData")
-//    Log.d("vu", "HomeScreen: $humidChartData")
-//    Log.d("vu", "HomeScreen: $lightChartData")
+
 
     val modelProducerColumn1 = remember { CartesianChartModelProducer() }
     val modelProducerLine = remember { CartesianChartModelProducer() }
     val modelProducerColumn2 = remember { CartesianChartModelProducer() }
+    //    val modelProducerLine2 = remember { CartesianChartModelProducer() }
 
 
     LaunchedEffect(tempChartData, humidChartData, lightChartData) {
         modelProducerColumn1.runTransaction { columnSeries { humidChartData?.let { series(y = it) } } }
         modelProducerLine.runTransaction { lineSeries { tempChartData?.let { series(y = it) } } }
         modelProducerColumn2.runTransaction { columnSeries { lightChartData?.let { series(y = it) } } }
+//        modelProducerLine2.runTransaction { lineSeries { dustChartData?.let { series(y = it) } } }
     }
 
     Box(
@@ -184,14 +189,16 @@ fun ChartCard(name: String, modelProducer: CartesianChartModelProducer, type: St
 }
 
 @Composable
-fun StatusBar(temperature: String, humidity: String, light: String) {
-//    val color = remember(temperature){getStatus(temperature)}
+fun StatusBar(temperature: String, humidity: String, light: String
+//              , dust: String
+) {
+    val color = remember(temperature){getStatus(temperature)}
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .background(
-                normalStatus
+                color
             )
     ) {
         Box(
@@ -216,13 +223,13 @@ fun StatusBar(temperature: String, humidity: String, light: String) {
                     StatusItem(
                         R.drawable.ic_temperature,
                         "Temperature",
-                        temperature,
+                        temperature + "°C",
                         modifier = Modifier.weight(1f)
                     )
                     StatusItem(
                         R.drawable.ic_humid,
-                        "Humidity",
-                        humidity,
+                        "Humidity" ,
+                        humidity + " %",
                         modifier = Modifier.weight(1f)
                     )
                     StatusItem(
@@ -231,6 +238,13 @@ fun StatusBar(temperature: String, humidity: String, light: String) {
                         light,
                         modifier = Modifier.weight(1f)
                     )
+
+//                    StatusItem(
+//                        R.drawable.ic_light,
+//                        "Dust",
+//                        dust,
+//                        modifier = Modifier.weight(1f)
+//                    )
                 }
             }
         }
@@ -392,6 +406,15 @@ fun ControllerContainer(viewmodel: HomeViewmodel, actionColorList: List<Int>, ac
                 viewmodel,
                 2
             )
+            Spacer(modifier = Modifier.height(10.dp))
+//            LongControllerItem(
+//                icon = R.drawable.ic_fan,
+//                name = "Smart Fan",
+//                actionColorList[3],
+//                actionList[3],
+//                viewmodel,
+//                3
+//            )
             Spacer(modifier = Modifier.height(10.dp))
         }
     }

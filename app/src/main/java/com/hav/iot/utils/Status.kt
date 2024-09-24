@@ -13,7 +13,7 @@ class Status {
             val temp = temperature.toInt()
             return when {
                 temp < 20 -> coldStatus
-                temp in 20..30 -> normalStatus
+                temp in 20..28 -> normalStatus
                 else -> hotStatus
             }
         }

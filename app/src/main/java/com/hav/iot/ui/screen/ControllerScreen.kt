@@ -87,6 +87,8 @@ fun ControllerScreen(deviceActionViewModel: DeviceActionViewModel) {
     //focus
     val focusManager = LocalFocusManager.current
 
+//    deviceActionViewModel.reload()
+
     fun onRefresh() {
         coroutineScope.launch {
             swipeRefreshState.isRefreshing = true
@@ -123,7 +125,7 @@ fun ControllerScreen(deviceActionViewModel: DeviceActionViewModel) {
 fun ControllerItem(icon: Int, name: String, realStatus : Int, actionStatus : Int, viewModel: HomeViewmodel, id : Int){
     val customFont = FontFamily(Font(R.font.notosans))
 
-    val checkedStatus = remember { mutableIntStateOf(actionStatus) }
+    val checkedStatus = remember(realStatus) { mutableIntStateOf(realStatus) }
 
     val color = remember(realStatus) { mutableIntStateOf(realStatus) }
 
@@ -195,7 +197,7 @@ fun ControllerItem(icon: Int, name: String, realStatus : Int, actionStatus : Int
 
 @Composable
 fun LongControllerItem(icon: Int, name: String, realStatus : Int, actionStatus : Int, viewModel: HomeViewmodel, id: Int){
-    val checkedStatus = remember { mutableIntStateOf(actionStatus) }
+    val checkedStatus = remember(realStatus) { mutableIntStateOf(realStatus) }
 
     val color = remember(realStatus) { mutableIntStateOf(realStatus) }
     Box(

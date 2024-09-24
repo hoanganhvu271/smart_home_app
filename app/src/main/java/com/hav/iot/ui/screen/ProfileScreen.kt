@@ -451,7 +451,7 @@ data class FeatureList(
 )
 
 val profilePopularList = listOf(
-    ProfilePopularList("Report", "Link to Report ...", "1", "PDF", "https://dashboard.render.com"),
+    ProfilePopularList("Report", "Link to Report ...", "1", "PDF", "https://drive.google.com/file/d/1wujw_GBDOsEv6wFJHcHqPo9Wm26df6Nt/view?usp=sharing"),
     ProfilePopularList("Github Project ", "Link to Git Project...", "1", "Github", "https://github.com/hoanganhvu271/smart_home_app.git"),
     ProfilePopularList("API Docs", "Link to API Docs...", "2", "Postman", "https://iot-server-siz9.onrender.com/api-docs")
 )
